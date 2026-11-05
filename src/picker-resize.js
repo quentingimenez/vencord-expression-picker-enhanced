@@ -511,6 +511,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let statusTimer = 0;
     let busy = false;
     let renderedKey = "";
+    let nativeFavoriteCache = { at: 0, names: new Set(), sizes: new Map() };
 
     function openDB() {
         if (!dbPromise) {
@@ -650,6 +651,48 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return section;
     }
 
+    function getNativeFavoriteCache() {
+        const now = Date.now();
+        if (now - nativeFavoriteCache.at < 1500) return nativeFavoriteCache;
+
+        const names = new Set();
+        const sizes = new Map();
+
+        try {
+            const gifs = window.Vencord?.Webpack?.Common?.UserSettingsProtoStore
+                ?.frecencyWithoutFetchingLatest?.favoriteGifs?.gifs;
+
+            if (gifs) {
+                for (const gif of Object.values(gifs)) {
+                    for (const url of [gif.url, gif.src, gif.gifSrc]) {
+                        if (!url) continue;
+                        try {
+                            const parsed = new URL(url, location.href);
+                            const name = decodeURIComponent(parsed.pathname.split("/").pop() || "").toLowerCase();
+                            if (!name) continue;
+                            names.add(name);
+                            if (!sizes.has(name) && gif.width && gif.height) {
+                                sizes.set(name, { width: gif.width, height: gif.height });
+                            }
+                        } catch { /* ignore */ }
+                    }
+                }
+            }
+        } catch { /* ignore */ }
+
+        nativeFavoriteCache = { at: now, names, sizes };
+        return nativeFavoriteCache;
+    }
+
+    function isNativeDuplicate(record, cache = getNativeFavoriteCache()) {
+        const name = record.name.toLowerCase();
+        if (!cache.names.has(name)) return false;
+        const size = cache.sizes.get(name);
+        if (size?.width && record.width && Math.abs(size.width - record.width) > 2) return false;
+        if (size?.height && record.height && Math.abs(size.height - record.height) > 2) return false;
+        return true;
+    }
+
     function renderSection(force = false) {
         const panel = findPanel();
         if (!panel) {
@@ -659,7 +702,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             renderedKey = "";
             return;
         }
-        if (!isFavoritesView(panel) || imports.length === 0) {
+
+        const nativeFavorites = getNativeFavoriteCache();
+        const visibleImports = imports.filter(record => !isNativeDuplicate(record, nativeFavorites));
+
+        if (!isFavoritesView(panel) || visibleImports.length === 0) {
             section?.remove();
             section = null;
             list = null;
@@ -675,16 +722,16 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (header && header.nextElementSibling !== section) header.after(section);
         else if (!header && section.parentElement !== panel) panel.prepend(section);
 
-        const key = imports.map(record => record.id).join("|");
+        const key = visibleImports.map(record => record.id).join("|");
         if (!force && hadSection && key === renderedKey) return;
 
         renderedKey = key;
 
         const title = section.querySelector(".vc-local-gifs-title span");
-        if (title) title.textContent = `Importés (${imports.length})`;
+        if (title) title.textContent = `Importés (${visibleImports.length})`;
 
         list.textContent = "";
-        for (const record of imports) {
+        for (const record of visibleImports) {
             const item = document.createElement("div");
             item.className = "vc-local-item";
 

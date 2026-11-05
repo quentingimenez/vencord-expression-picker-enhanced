@@ -76,6 +76,11 @@ button on a thumbnail to remove it.
 
 Limits: input files up to 100 MB; converted GIFs up to 8 MB.
 
+If a sent imported GIF is also added to Discord's **native** favorites (for
+example by favoriting the message attachment), the matching local tile is
+hidden automatically to avoid a duplicate. It reappears if the native
+favorite is removed.
+
 ## Uninstall
 
 Double-click **`uninstall.cmd`**, then restart Discord.
