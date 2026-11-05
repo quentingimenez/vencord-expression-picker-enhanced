@@ -510,6 +510,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let statusEl = null;
     let statusTimer = 0;
     let busy = false;
+    let renderedKey = "";
 
     function openDB() {
         if (!dbPromise) {
@@ -649,24 +650,35 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return section;
     }
 
-    function renderSection() {
+    function renderSection(force = false) {
         const panel = findPanel();
         if (!panel) {
             section?.remove();
+            section = null;
+            list = null;
+            renderedKey = "";
             return;
         }
         if (!isFavoritesView(panel) || imports.length === 0) {
             section?.remove();
+            section = null;
+            list = null;
+            renderedKey = "";
             return;
         }
 
+        const hadSection = !!section?.isConnected;
         ensureSection(panel);
         if (!section?.isConnected) return;
-        if (!section.isConnected || section.parentElement !== panel) {
-            const header = panel.querySelector(":scope > [class*=\"header_\"]");
-            if (header) header.after(section);
-            else panel.prepend(section);
-        }
+
+        const header = panel.querySelector(":scope > [class*=\"header_\"]");
+        if (header && header.nextElementSibling !== section) header.after(section);
+        else if (!header && section.parentElement !== panel) panel.prepend(section);
+
+        const key = imports.map(record => record.id).join("|");
+        if (!force && hadSection && key === renderedKey) return;
+
+        renderedKey = key;
 
         const title = section.querySelector(".vc-local-gifs-title span");
         if (title) title.textContent = `Importés (${imports.length})`;
@@ -679,12 +691,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const attach = document.createElement("button");
             attach.type = "button";
             attach.className = "vc-local-attach";
-            attach.title = "Ajouter au message";
             attach.setAttribute("aria-label", `Ajouter ${record.name} au message`);
 
             const image = document.createElement("img");
             image.src = objectUrls.get(record.id) || "";
-            image.alt = record.name;
+            image.alt = "";
             image.loading = "lazy";
             image.draggable = false;
             attach.appendChild(image);
@@ -697,7 +708,6 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const remove = document.createElement("button");
             remove.type = "button";
             remove.className = "vc-local-delete";
-            remove.title = "Supprimer";
             remove.setAttribute("aria-label", `Supprimer ${record.name}`);
             remove.textContent = "×";
             remove.addEventListener("click", event => {
@@ -762,7 +772,25 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         for (const record of imports) {
             objectUrls.set(record.id, URL.createObjectURL(record.blob));
         }
-        renderSection();
+        renderSection(true);
+    }
+
+    function closePicker() {
+        try {
+            const store = window.Vencord?.Webpack?.Common?.ExpressionPickerStore;
+            if (typeof store?.closeExpressionPicker === "function") {
+                store.closeExpressionPicker();
+                return true;
+            }
+        } catch { /* ignore */ }
+        try {
+            const actions = window.Vencord?.Webpack?.findByProps?.("v8", "RQ");
+            if (typeof actions?.v8 === "function") {
+                actions.v8();
+                return true;
+            }
+        } catch { /* ignore */ }
+        return false;
     }
 
     function attachToComposer(record) {
@@ -789,8 +817,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             allowOptimization: false
         });
 
-        setStatus("GIF joint au message");
-        document.querySelector('[data-slate-editor="true"]')?.focus?.();
+        const closed = closePicker();
+        requestAnimationFrame(() => {
+            document.querySelector('[data-slate-editor="true"]')?.focus?.();
+        });
+        if (!closed) setStatus("GIF joint au message");
     }
 
     async function deleteRecord(record) {

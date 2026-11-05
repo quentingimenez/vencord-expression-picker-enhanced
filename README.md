@@ -66,8 +66,8 @@ grip handles both dimensions.
 4. Images and videos are converted to GIF automatically (max 480 px,
    6 seconds, 10 fps, 8 MB output).
 5. Open the **Favorites** tab. Imported GIFs are shown in the **Imported**
-   strip. Click one to attach it to the message box, then press Enter to
-   send it.
+   strip. Click one to attach it to the message box; the picker closes
+   automatically. Press Enter to send it.
 
 Imported GIFs are stored **locally** in this Discord installation
 (IndexedDB). They are not synced to other devices, and they are sent as
