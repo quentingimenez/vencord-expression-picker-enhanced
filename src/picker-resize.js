@@ -487,6 +487,622 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         "video/mp4", "video/webm", "video/quicktime", "video/x-matroska"
     ].join(",");
 
+    const MESSAGES = {
+        en: {
+            categoryName: "Imported",
+            importButton: "Import GIFs",
+            importTile: "Import",
+            searchPlaceholder: "Search imported",
+            back: "Back",
+            clear: "Clear",
+            addToMessage: "Add {name} to message",
+            deleteImport: "Delete {name}",
+            deleteCompletely: "Delete this imported GIF completely",
+            addFavorite: "Add to favorites",
+            removeFavorite: "Remove from favorites",
+            countGifs: { one: "{count} GIF", other: "{count} GIFs" },
+            countResults: { one: "{count} result", other: "{count} results" },
+            emptyImports: "No imported GIFs yet",
+            noResults: "No results for “{query}”",
+            converting: "Converting {current}/{total}: {name}",
+            importedCount: { one: "{count} GIF imported", other: "{count} GIFs imported" },
+            noneImported: "No GIF imported",
+            attachFailed: "Could not attach the GIF",
+            attached: "GIF attached to the message",
+            deleted: "Imported GIF deleted",
+            deletedWithFavorite: "GIF and favorite deleted",
+            favoriteRemoved: "GIF removed from favorites",
+            favoriteNeedsSend: "Send this GIF once before adding it to favorites",
+            favoriteFailed: "Could not update favorites",
+            deleteFailed: "Could not delete the GIF",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "conversion failed",
+            fileTooLarge: "file too large (max 100 MB)",
+            gifTooLarge: "GIF too large (max 8 MB)",
+            convertedTooLarge: "converted GIF too large (max 8 MB)",
+            unsupportedFormat: "unsupported format",
+            noFrames: "no frame could be decoded",
+            videoReadTimeout: "video loading timed out",
+            videoUnsupported: "unsupported video format",
+            invalidVideoDimensions: "invalid video dimensions",
+            videoConvertTimeout: "video conversion timed out",
+            imageUnreadable: "unreadable image"
+        },
+        fr: {
+            categoryName: "Importés",
+            importButton: "Importer des GIF",
+            importTile: "Importer",
+            searchPlaceholder: "Rechercher dans les importés",
+            back: "Retour",
+            clear: "Effacer",
+            addToMessage: "Ajouter {name} au message",
+            deleteImport: "Supprimer {name}",
+            deleteCompletely: "Supprimer complètement ce GIF importé",
+            addFavorite: "Ajouter aux favoris",
+            removeFavorite: "Retirer des favoris",
+            countGifs: { one: "{count} GIF", other: "{count} GIFs" },
+            countResults: { one: "{count} résultat", other: "{count} résultats" },
+            emptyImports: "Aucun GIF importé pour le moment",
+            noResults: "Aucun résultat pour « {query} »",
+            converting: "Conversion {current}/{total} : {name}",
+            importedCount: { one: "{count} GIF importé", other: "{count} GIFs importés" },
+            noneImported: "Aucun GIF importé",
+            attachFailed: "Impossible de joindre le GIF",
+            attached: "GIF joint au message",
+            deleted: "GIF importé supprimé",
+            deletedWithFavorite: "GIF et favori supprimés",
+            favoriteRemoved: "GIF retiré des favoris",
+            favoriteNeedsSend: "Envoie d'abord ce GIF pour le mettre en favori",
+            favoriteFailed: "Impossible de modifier les favoris",
+            deleteFailed: "Impossible de supprimer le GIF",
+            conversionFailed: "{name} : {message}",
+            conversionFailedGeneric: "échec de la conversion",
+            fileTooLarge: "fichier trop volumineux (max 100 Mo)",
+            gifTooLarge: "GIF trop lourd (max 8 Mo)",
+            convertedTooLarge: "GIF converti trop lourd (max 8 Mo)",
+            unsupportedFormat: "format non pris en charge",
+            noFrames: "aucune image décodée",
+            videoReadTimeout: "délai de lecture vidéo dépassé",
+            videoUnsupported: "format vidéo non pris en charge",
+            invalidVideoDimensions: "dimensions vidéo invalides",
+            videoConvertTimeout: "délai de conversion vidéo dépassé",
+            imageUnreadable: "image illisible"
+        },
+        es: {
+            categoryName: "Importados",
+            importButton: "Importar GIF",
+            importTile: "Importar",
+            searchPlaceholder: "Buscar en los importados",
+            back: "Atrás",
+            clear: "Borrar",
+            addToMessage: "Añadir {name} al mensaje",
+            deleteImport: "Eliminar {name}",
+            deleteCompletely: "Eliminar completamente este GIF importado",
+            addFavorite: "Añadir a favoritos",
+            removeFavorite: "Quitar de favoritos",
+            countGifs: { one: "{count} GIF", other: "{count} GIFs" },
+            countResults: { one: "{count} resultado", other: "{count} resultados" },
+            emptyImports: "Aún no hay GIF importados",
+            noResults: "No hay resultados para «{query}»",
+            converting: "Convirtiendo {current}/{total}: {name}",
+            importedCount: { one: "{count} GIF importado", other: "{count} GIFs importados" },
+            noneImported: "No se importó ningún GIF",
+            attachFailed: "No se pudo adjuntar el GIF",
+            attached: "GIF adjunto al mensaje",
+            deleted: "GIF importado eliminado",
+            deletedWithFavorite: "GIF y favorito eliminados",
+            favoriteRemoved: "GIF eliminado de favoritos",
+            favoriteNeedsSend: "Envía este GIF una vez antes de añadirlo a favoritos",
+            favoriteFailed: "No se pudieron modificar los favoritos",
+            deleteFailed: "No se pudo eliminar el GIF",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "error de conversión",
+            fileTooLarge: "archivo demasiado grande (máx. 100 MB)",
+            gifTooLarge: "GIF demasiado grande (máx. 8 MB)",
+            convertedTooLarge: "GIF convertido demasiado grande (máx. 8 MB)",
+            unsupportedFormat: "formato no compatible",
+            noFrames: "no se pudo decodificar ningún fotograma",
+            videoReadTimeout: "se agotó el tiempo de carga del vídeo",
+            videoUnsupported: "formato de vídeo no compatible",
+            invalidVideoDimensions: "dimensiones de vídeo no válidas",
+            videoConvertTimeout: "se agotó el tiempo de conversión del vídeo",
+            imageUnreadable: "imagen ilegible"
+        },
+        de: {
+            categoryName: "Importiert",
+            importButton: "GIFs importieren",
+            importTile: "Importieren",
+            searchPlaceholder: "Importierte durchsuchen",
+            back: "Zurück",
+            clear: "Löschen",
+            addToMessage: "„{name}“ zur Nachricht hinzufügen",
+            deleteImport: "„{name}“ löschen",
+            deleteCompletely: "Dieses importierte GIF vollständig löschen",
+            addFavorite: "Zu Favoriten hinzufügen",
+            removeFavorite: "Aus Favoriten entfernen",
+            countGifs: { one: "{count} GIF", other: "{count} GIFs" },
+            countResults: { one: "{count} Ergebnis", other: "{count} Ergebnisse" },
+            emptyImports: "Noch keine importierten GIFs",
+            noResults: "Keine Ergebnisse für „{query}“",
+            converting: "Konvertiere {current}/{total}: {name}",
+            importedCount: { one: "{count} GIF importiert", other: "{count} GIFs importiert" },
+            noneImported: "Kein GIF importiert",
+            attachFailed: "GIF konnte nicht angehängt werden",
+            attached: "GIF an die Nachricht angehängt",
+            deleted: "Importiertes GIF gelöscht",
+            deletedWithFavorite: "GIF und Favorit gelöscht",
+            favoriteRemoved: "GIF aus Favoriten entfernt",
+            favoriteNeedsSend: "Sende dieses GIF zuerst, bevor du es zu Favoriten hinzufügst",
+            favoriteFailed: "Favoriten konnten nicht geändert werden",
+            deleteFailed: "GIF konnte nicht gelöscht werden",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "Konvertierung fehlgeschlagen",
+            fileTooLarge: "Datei zu groß (max. 100 MB)",
+            gifTooLarge: "GIF zu groß (max. 8 MB)",
+            convertedTooLarge: "Konvertiertes GIF zu groß (max. 8 MB)",
+            unsupportedFormat: "nicht unterstütztes Format",
+            noFrames: "kein Bild konnte dekodiert werden",
+            videoReadTimeout: "Zeitüberschreitung beim Laden des Videos",
+            videoUnsupported: "nicht unterstütztes Videoformat",
+            invalidVideoDimensions: "ungültige Videomaße",
+            videoConvertTimeout: "Zeitüberschreitung bei der Videokonvertierung",
+            imageUnreadable: "Bild nicht lesbar"
+        },
+        it: {
+            categoryName: "Importati",
+            importButton: "Importa GIF",
+            importTile: "Importa",
+            searchPlaceholder: "Cerca negli importati",
+            back: "Indietro",
+            clear: "Cancella",
+            addToMessage: "Aggiungi {name} al messaggio",
+            deleteImport: "Elimina {name}",
+            deleteCompletely: "Elimina completamente questo GIF importato",
+            addFavorite: "Aggiungi ai preferiti",
+            removeFavorite: "Rimuovi dai preferiti",
+            countGifs: { one: "{count} GIF", other: "{count} GIF" },
+            countResults: { one: "{count} risultato", other: "{count} risultati" },
+            emptyImports: "Nessun GIF importato per ora",
+            noResults: "Nessun risultato per «{query}»",
+            converting: "Conversione {current}/{total}: {name}",
+            importedCount: { one: "{count} GIF importato", other: "{count} GIF importati" },
+            noneImported: "Nessun GIF importato",
+            attachFailed: "Impossibile allegare il GIF",
+            attached: "GIF allegato al messaggio",
+            deleted: "GIF importato eliminato",
+            deletedWithFavorite: "GIF e preferito eliminati",
+            favoriteRemoved: "GIF rimosso dai preferiti",
+            favoriteNeedsSend: "Invia prima questo GIF per aggiungerlo ai preferiti",
+            favoriteFailed: "Impossibile modificare i preferiti",
+            deleteFailed: "Impossibile eliminare il GIF",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "conversione non riuscita",
+            fileTooLarge: "file troppo grande (max 100 MB)",
+            gifTooLarge: "GIF troppo grande (max 8 MB)",
+            convertedTooLarge: "GIF convertito troppo grande (max 8 MB)",
+            unsupportedFormat: "formato non supportato",
+            noFrames: "nessun fotogramma decodificato",
+            videoReadTimeout: "timeout durante il caricamento del video",
+            videoUnsupported: "formato video non supportato",
+            invalidVideoDimensions: "dimensioni video non valide",
+            videoConvertTimeout: "timeout durante la conversione del video",
+            imageUnreadable: "immagine illeggibile"
+        },
+        pt: {
+            categoryName: "Importados",
+            importButton: "Importar GIFs",
+            importTile: "Importar",
+            searchPlaceholder: "Pesquisar nos importados",
+            back: "Voltar",
+            clear: "Limpar",
+            addToMessage: "Adicionar {name} à mensagem",
+            deleteImport: "Excluir {name}",
+            deleteCompletely: "Excluir completamente este GIF importado",
+            addFavorite: "Adicionar aos favoritos",
+            removeFavorite: "Remover dos favoritos",
+            countGifs: { one: "{count} GIF", other: "{count} GIFs" },
+            countResults: { one: "{count} resultado", other: "{count} resultados" },
+            emptyImports: "Nenhum GIF importado ainda",
+            noResults: "Nenhum resultado para “{query}”",
+            converting: "Convertendo {current}/{total}: {name}",
+            importedCount: { one: "{count} GIF importado", other: "{count} GIFs importados" },
+            noneImported: "Nenhum GIF importado",
+            attachFailed: "Não foi possível anexar o GIF",
+            attached: "GIF anexado à mensagem",
+            deleted: "GIF importado excluído",
+            deletedWithFavorite: "GIF e favorito excluídos",
+            favoriteRemoved: "GIF removido dos favoritos",
+            favoriteNeedsSend: "Envie este GIF uma vez antes de adicioná-lo aos favoritos",
+            favoriteFailed: "Não foi possível alterar os favoritos",
+            deleteFailed: "Não foi possível excluir o GIF",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "falha na conversão",
+            fileTooLarge: "arquivo muito grande (máx. 100 MB)",
+            gifTooLarge: "GIF muito grande (máx. 8 MB)",
+            convertedTooLarge: "GIF convertido muito grande (máx. 8 MB)",
+            unsupportedFormat: "formato não suportado",
+            noFrames: "nenhum quadro pôde ser decodificado",
+            videoReadTimeout: "tempo limite ao carregar o vídeo",
+            videoUnsupported: "formato de vídeo não suportado",
+            invalidVideoDimensions: "dimensões de vídeo inválidas",
+            videoConvertTimeout: "tempo limite na conversão do vídeo",
+            imageUnreadable: "imagem ilegível"
+        },
+        nl: {
+            categoryName: "Geïmporteerd",
+            importButton: "GIF's importeren",
+            importTile: "Importeren",
+            searchPlaceholder: "Geïmporteerde GIF's zoeken",
+            back: "Terug",
+            clear: "Wissen",
+            addToMessage: "{name} aan bericht toevoegen",
+            deleteImport: "{name} verwijderen",
+            deleteCompletely: "Dit geïmporteerde GIF volledig verwijderen",
+            addFavorite: "Aan favorieten toevoegen",
+            removeFavorite: "Uit favorieten verwijderen",
+            countGifs: { one: "{count} GIF", other: "{count} GIF's" },
+            countResults: { one: "{count} resultaat", other: "{count} resultaten" },
+            emptyImports: "Nog geen geïmporteerde GIF's",
+            noResults: "Geen resultaten voor ‘{query}’",
+            converting: "{current}/{total} converteren: {name}",
+            importedCount: { one: "{count} GIF geïmporteerd", other: "{count} GIF's geïmporteerd" },
+            noneImported: "Geen GIF geïmporteerd",
+            attachFailed: "Kan het GIF niet toevoegen",
+            attached: "GIF aan bericht toegevoegd",
+            deleted: "Geïmporteerd GIF verwijderd",
+            deletedWithFavorite: "GIF en favoriet verwijderd",
+            favoriteRemoved: "GIF uit favorieten verwijderd",
+            favoriteNeedsSend: "Verstuur dit GIF eerst voordat je het aan favorieten toevoegt",
+            favoriteFailed: "Kan favorieten niet aanpassen",
+            deleteFailed: "Kan het GIF niet verwijderen",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "conversie mislukt",
+            fileTooLarge: "bestand te groot (max. 100 MB)",
+            gifTooLarge: "GIF te groot (max. 8 MB)",
+            convertedTooLarge: "geconverteerd GIF te groot (max. 8 MB)",
+            unsupportedFormat: "niet-ondersteund formaat",
+            noFrames: "geen frame gedecodeerd",
+            videoReadTimeout: "time-out bij laden van video",
+            videoUnsupported: "niet-ondersteund videoformaat",
+            invalidVideoDimensions: "ongeldige videoafmetingen",
+            videoConvertTimeout: "time-out bij videoconversie",
+            imageUnreadable: "afbeelding onleesbaar"
+        },
+        pl: {
+            categoryName: "Zaimportowane",
+            importButton: "Importuj GIF-y",
+            importTile: "Importuj",
+            searchPlaceholder: "Szukaj w zaimportowanych",
+            back: "Wstecz",
+            clear: "Wyczyść",
+            addToMessage: "Dodaj {name} do wiadomości",
+            deleteImport: "Usuń {name}",
+            deleteCompletely: "Usuń całkowicie ten zaimportowany GIF",
+            addFavorite: "Dodaj do ulubionych",
+            removeFavorite: "Usuń z ulubionych",
+            countGifs: { one: "{count} GIF", few: "{count} GIF-y", many: "{count} GIF-ów", other: "{count} GIF-a" },
+            countResults: { one: "{count} wynik", few: "{count} wyniki", many: "{count} wyników", other: "{count} wyniku" },
+            emptyImports: "Nie ma jeszcze zaimportowanych GIF-ów",
+            noResults: "Brak wyników dla „{query}”",
+            converting: "Konwersja {current}/{total}: {name}",
+            importedCount: { one: "Zaimportowano {count} GIF", few: "Zaimportowano {count} GIF-y", many: "Zaimportowano {count} GIF-ów", other: "Zaimportowano {count} GIF-a" },
+            noneImported: "Nie zaimportowano żadnego GIF-a",
+            attachFailed: "Nie udało się dołączyć GIF-a",
+            attached: "GIF dołączony do wiadomości",
+            deleted: "Zaimportowany GIF usunięty",
+            deletedWithFavorite: "GIF i ulubione usunięte",
+            favoriteRemoved: "GIF usunięty z ulubionych",
+            favoriteNeedsSend: "Wyślij ten GIF raz, aby dodać go do ulubionych",
+            favoriteFailed: "Nie udało się zmienić ulubionych",
+            deleteFailed: "Nie udało się usunąć GIF-a",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "konwersja nie powiodła się",
+            fileTooLarge: "plik jest za duży (maks. 100 MB)",
+            gifTooLarge: "GIF jest za duży (maks. 8 MB)",
+            convertedTooLarge: "przekonwertowany GIF jest za duży (maks. 8 MB)",
+            unsupportedFormat: "nieobsługiwany format",
+            noFrames: "nie udało się zdekodować żadnej klatki",
+            videoReadTimeout: "przekroczono limit czasu wczytywania wideo",
+            videoUnsupported: "nieobsługiwany format wideo",
+            invalidVideoDimensions: "nieprawidłowe wymiary wideo",
+            videoConvertTimeout: "przekroczono limit czasu konwersji wideo",
+            imageUnreadable: "nieczytelny obraz"
+        },
+        ru: {
+            categoryName: "Импортированные",
+            importButton: "Импортировать GIF",
+            importTile: "Импортировать",
+            searchPlaceholder: "Поиск среди импортированных",
+            back: "Назад",
+            clear: "Очистить",
+            addToMessage: "Добавить {name} в сообщение",
+            deleteImport: "Удалить {name}",
+            deleteCompletely: "Полностью удалить этот импортированный GIF",
+            addFavorite: "Добавить в избранное",
+            removeFavorite: "Удалить из избранного",
+            countGifs: { one: "{count} GIF", few: "{count} GIF", many: "{count} GIF", other: "{count} GIF" },
+            countResults: { one: "{count} результат", few: "{count} результата", many: "{count} результатов", other: "{count} результата" },
+            emptyImports: "Импортированных GIF пока нет",
+            noResults: "Нет результатов по запросу «{query}»",
+            converting: "Преобразование {current}/{total}: {name}",
+            importedCount: { one: "Импортирован {count} GIF", few: "Импортировано {count} GIF", many: "Импортировано {count} GIF", other: "Импортировано {count} GIF" },
+            noneImported: "GIF не импортирован",
+            attachFailed: "Не удалось прикрепить GIF",
+            attached: "GIF прикреплён к сообщению",
+            deleted: "Импортированный GIF удалён",
+            deletedWithFavorite: "GIF и избранное удалены",
+            favoriteRemoved: "GIF удалён из избранного",
+            favoriteNeedsSend: "Сначала отправьте этот GIF, чтобы добавить его в избранное",
+            favoriteFailed: "Не удалось изменить избранное",
+            deleteFailed: "Не удалось удалить GIF",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "ошибка преобразования",
+            fileTooLarge: "файл слишком большой (макс. 100 МБ)",
+            gifTooLarge: "GIF слишком большой (макс. 8 МБ)",
+            convertedTooLarge: "преобразованный GIF слишком большой (макс. 8 МБ)",
+            unsupportedFormat: "неподдерживаемый формат",
+            noFrames: "не удалось декодировать ни одного кадра",
+            videoReadTimeout: "истекло время загрузки видео",
+            videoUnsupported: "неподдерживаемый формат видео",
+            invalidVideoDimensions: "недопустимые размеры видео",
+            videoConvertTimeout: "истекло время преобразования видео",
+            imageUnreadable: "не удалось прочитать изображение"
+        },
+        ja: {
+            categoryName: "インポート済み",
+            importButton: "GIFをインポート",
+            importTile: "インポート",
+            searchPlaceholder: "インポート済みを検索",
+            back: "戻る",
+            clear: "クリア",
+            addToMessage: "{name}をメッセージに追加",
+            deleteImport: "{name}を削除",
+            deleteCompletely: "このインポート済みGIFを完全に削除",
+            addFavorite: "お気に入りに追加",
+            removeFavorite: "お気に入りから削除",
+            countGifs: "{count}件のGIF",
+            countResults: "{count}件の結果",
+            emptyImports: "インポート済みのGIFはまだありません",
+            noResults: "「{query}」の結果はありません",
+            converting: "変換中 {current}/{total}: {name}",
+            importedCount: "{count}件のGIFをインポートしました",
+            noneImported: "GIFはインポートされませんでした",
+            attachFailed: "GIFを添付できませんでした",
+            attached: "GIFをメッセージに添付しました",
+            deleted: "インポート済みGIFを削除しました",
+            deletedWithFavorite: "GIFとお気に入りを削除しました",
+            favoriteRemoved: "GIFをお気に入りから削除しました",
+            favoriteNeedsSend: "お気に入りに追加するには、先にこのGIFを送信してください",
+            favoriteFailed: "お気に入りを変更できませんでした",
+            deleteFailed: "GIFを削除できませんでした",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "変換に失敗しました",
+            fileTooLarge: "ファイルが大きすぎます（最大100MB）",
+            gifTooLarge: "GIFが大きすぎます（最大8MB）",
+            convertedTooLarge: "変換後のGIFが大きすぎます（最大8MB）",
+            unsupportedFormat: "未対応の形式です",
+            noFrames: "フレームをデコードできませんでした",
+            videoReadTimeout: "動画の読み込みがタイムアウトしました",
+            videoUnsupported: "未対応の動画形式です",
+            invalidVideoDimensions: "動画のサイズが無効です",
+            videoConvertTimeout: "動画の変換がタイムアウトしました",
+            imageUnreadable: "画像を読み込めませんでした"
+        },
+        ko: {
+            categoryName: "가져온 GIF",
+            importButton: "GIF 가져오기",
+            importTile: "가져오기",
+            searchPlaceholder: "가져온 GIF 검색",
+            back: "뒤로",
+            clear: "지우기",
+            addToMessage: "{name}을(를) 메시지에 추가",
+            deleteImport: "{name} 삭제",
+            deleteCompletely: "이 가져온 GIF 완전히 삭제",
+            addFavorite: "즐겨찾기에 추가",
+            removeFavorite: "즐겨찾기에서 제거",
+            countGifs: "GIF {count}개",
+            countResults: "결과 {count}개",
+            emptyImports: "아직 가져온 GIF가 없습니다",
+            noResults: "‘{query}’에 대한 결과가 없습니다",
+            converting: "변환 중 {current}/{total}: {name}",
+            importedCount: "GIF {count}개를 가져왔습니다",
+            noneImported: "가져온 GIF가 없습니다",
+            attachFailed: "GIF를 첨부할 수 없습니다",
+            attached: "GIF를 메시지에 첨부했습니다",
+            deleted: "가져온 GIF를 삭제했습니다",
+            deletedWithFavorite: "GIF와 즐겨찾기를 삭제했습니다",
+            favoriteRemoved: "GIF를 즐겨찾기에서 제거했습니다",
+            favoriteNeedsSend: "즐겨찾기에 추가하려면 먼저 이 GIF를 보내세요",
+            favoriteFailed: "즐겨찾기를 변경할 수 없습니다",
+            deleteFailed: "GIF를 삭제할 수 없습니다",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "변환 실패",
+            fileTooLarge: "파일이 너무 큽니다(최대 100MB)",
+            gifTooLarge: "GIF가 너무 큽니다(최대 8MB)",
+            convertedTooLarge: "변환된 GIF가 너무 큽니다(최대 8MB)",
+            unsupportedFormat: "지원하지 않는 형식",
+            noFrames: "프레임을 디코딩할 수 없습니다",
+            videoReadTimeout: "동영상 로드 시간 초과",
+            videoUnsupported: "지원하지 않는 동영상 형식",
+            invalidVideoDimensions: "동영상 크기가 잘못되었습니다",
+            videoConvertTimeout: "동영상 변환 시간 초과",
+            imageUnreadable: "이미지를 읽을 수 없습니다"
+        },
+        "zh-CN": {
+            categoryName: "已导入",
+            importButton: "导入 GIF",
+            importTile: "导入",
+            searchPlaceholder: "搜索已导入的 GIF",
+            back: "返回",
+            clear: "清除",
+            addToMessage: "将 {name} 添加到消息",
+            deleteImport: "删除 {name}",
+            deleteCompletely: "彻底删除此已导入的 GIF",
+            addFavorite: "添加到收藏",
+            removeFavorite: "从收藏中移除",
+            countGifs: "{count} 个 GIF",
+            countResults: "{count} 个结果",
+            emptyImports: "还没有已导入的 GIF",
+            noResults: "没有找到“{query}”的结果",
+            converting: "正在转换 {current}/{total}：{name}",
+            importedCount: "已导入 {count} 个 GIF",
+            noneImported: "未导入任何 GIF",
+            attachFailed: "无法附加 GIF",
+            attached: "GIF 已附加到消息",
+            deleted: "已删除导入的 GIF",
+            deletedWithFavorite: "GIF 和收藏已删除",
+            favoriteRemoved: "GIF 已从收藏中移除",
+            favoriteNeedsSend: "请先发送此 GIF，然后才能将其添加到收藏",
+            favoriteFailed: "无法修改收藏",
+            deleteFailed: "无法删除 GIF",
+            conversionFailed: "{name}：{message}",
+            conversionFailedGeneric: "转换失败",
+            fileTooLarge: "文件过大（最大 100 MB）",
+            gifTooLarge: "GIF 过大（最大 8 MB）",
+            convertedTooLarge: "转换后的 GIF 过大（最大 8 MB）",
+            unsupportedFormat: "不支持的格式",
+            noFrames: "无法解码任何帧",
+            videoReadTimeout: "视频加载超时",
+            videoUnsupported: "不支持的视频格式",
+            invalidVideoDimensions: "视频尺寸无效",
+            videoConvertTimeout: "视频转换超时",
+            imageUnreadable: "无法读取图像"
+        },
+        "zh-TW": {
+            categoryName: "已匯入",
+            importButton: "匯入 GIF",
+            importTile: "匯入",
+            searchPlaceholder: "搜尋已匯入的 GIF",
+            back: "返回",
+            clear: "清除",
+            addToMessage: "將 {name} 加入訊息",
+            deleteImport: "刪除 {name}",
+            deleteCompletely: "徹底刪除此已匯入的 GIF",
+            addFavorite: "加入收藏",
+            removeFavorite: "從收藏中移除",
+            countGifs: "{count} 個 GIF",
+            countResults: "{count} 個結果",
+            emptyImports: "尚無已匯入的 GIF",
+            noResults: "找不到「{query}」的結果",
+            converting: "正在轉換 {current}/{total}：{name}",
+            importedCount: "已匯入 {count} 個 GIF",
+            noneImported: "未匯入任何 GIF",
+            attachFailed: "無法附加 GIF",
+            attached: "GIF 已附加至訊息",
+            deleted: "已刪除匯入的 GIF",
+            deletedWithFavorite: "GIF 與收藏已刪除",
+            favoriteRemoved: "GIF 已從收藏中移除",
+            favoriteNeedsSend: "請先傳送此 GIF，才能將其加入收藏",
+            favoriteFailed: "無法修改收藏",
+            deleteFailed: "無法刪除 GIF",
+            conversionFailed: "{name}：{message}",
+            conversionFailedGeneric: "轉換失敗",
+            fileTooLarge: "檔案過大（最大 100 MB）",
+            gifTooLarge: "GIF 過大（最大 8 MB）",
+            convertedTooLarge: "轉換後的 GIF 過大（最大 8 MB）",
+            unsupportedFormat: "不支援的格式",
+            noFrames: "無法解碼任何影格",
+            videoReadTimeout: "影片載入逾時",
+            videoUnsupported: "不支援的影片格式",
+            invalidVideoDimensions: "影片尺寸無效",
+            videoConvertTimeout: "影片轉換逾時",
+            imageUnreadable: "無法讀取圖片"
+        },
+        tr: {
+            categoryName: "İçe Aktarılanlar",
+            importButton: "GIF içe aktar",
+            importTile: "İçe aktar",
+            searchPlaceholder: "İçe aktarılanlarda ara",
+            back: "Geri",
+            clear: "Temizle",
+            addToMessage: "{name} öğesini mesaja ekle",
+            deleteImport: "{name} öğesini sil",
+            deleteCompletely: "Bu içe aktarılan GIF'i tamamen sil",
+            addFavorite: "Favorilere ekle",
+            removeFavorite: "Favorilerden çıkar",
+            countGifs: "{count} GIF",
+            countResults: "{count} sonuç",
+            emptyImports: "Henüz içe aktarılan GIF yok",
+            noResults: "“{query}” için sonuç yok",
+            converting: "Dönüştürülüyor {current}/{total}: {name}",
+            importedCount: "{count} GIF içe aktarıldı",
+            noneImported: "Hiç GIF içe aktarılmadı",
+            attachFailed: "GIF eklenemedi",
+            attached: "GIF mesaja eklendi",
+            deleted: "İçe aktarılan GIF silindi",
+            deletedWithFavorite: "GIF ve favori silindi",
+            favoriteRemoved: "GIF favorilerden çıkarıldı",
+            favoriteNeedsSend: "Favorilere eklemeden önce bu GIF'i bir kez gönderin",
+            favoriteFailed: "Favoriler değiştirilemedi",
+            deleteFailed: "GIF silinemedi",
+            conversionFailed: "{name}: {message}",
+            conversionFailedGeneric: "dönüştürme başarısız",
+            fileTooLarge: "dosya çok büyük (en fazla 100 MB)",
+            gifTooLarge: "GIF çok büyük (en fazla 8 MB)",
+            convertedTooLarge: "dönüştürülen GIF çok büyük (en fazla 8 MB)",
+            unsupportedFormat: "desteklenmeyen biçim",
+            noFrames: "hiçbir kare çözülemedi",
+            videoReadTimeout: "video yükleme zaman aşımına uğradı",
+            videoUnsupported: "desteklenmeyen video biçimi",
+            invalidVideoDimensions: "geçersiz video boyutları",
+            videoConvertTimeout: "video dönüştürme zaman aşımına uğradı",
+            imageUnreadable: "görüntü okunamadı"
+        }
+    };
+
+    let currentLocale = null;
+
+    function detectDiscordLocale() {
+        try {
+            const common = window.Vencord?.Webpack?.Common;
+            const locale = common?.UserSettingsProtoStore?.settings?.localization?.locale?.value
+                ?? window.Vencord?.Webpack?.findByProps?.("getLocale")?.getLocale?.()
+                ?? common?.i18n?.intl?.currentLocale;
+            return locale ? String(locale) : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function normalizeLocale(locale) {
+        const value = String(locale || "").replace("_", "-").toLowerCase();
+        if (!value) return "en";
+        if (value === "zh-hans") return "zh-CN";
+        if (value === "zh-hant") return "zh-TW";
+        const exact = Object.keys(MESSAGES).find(key => key.toLowerCase() === value);
+        if (exact) return exact;
+        const base = value.split("-")[0];
+        const baseMatch = Object.keys(MESSAGES).find(key => key.toLowerCase() === base);
+        return baseMatch || "en";
+    }
+
+    function getLocale() {
+        if (currentLocale) return currentLocale;
+        const discordLocale = detectDiscordLocale();
+        if (discordLocale) currentLocale = normalizeLocale(discordLocale);
+        return currentLocale || normalizeLocale(navigator.language || "en");
+    }
+
+    function interpolate(template, params) {
+        return String(template).replace(/\{(\w+)\}/g, (match, name) =>
+            params[name] == null ? "" : String(params[name])
+        );
+    }
+
+    function t(key, params = {}) {
+        const locale = getLocale();
+        const table = MESSAGES[locale] || MESSAGES.en;
+        let entry = table[key] ?? MESSAGES.en[key] ?? key;
+
+        if (entry && typeof entry === "object") {
+            const count = Number(params.count);
+            const category = new Intl.PluralRules(locale).select(Number.isFinite(count) ? count : 0);
+            entry = entry[category] ?? entry.other ?? entry.one ?? "";
+        }
+
+        return interpolate(entry, params);
+    }
+
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     const yieldUI = () => new Promise(resolve => setTimeout(resolve, 0));
     const fit = (width, height) => {
@@ -737,7 +1353,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const hasBack = !!backButton;
         const favoritesView = !!panel.querySelector('[class*="favoritesHeader"]');
         const searchValue = panel.querySelector('input[role="searchbox"]')?.value?.trim() || "";
-        const favoritesCard = panel.querySelector('.content_fed6d3 .result__2dc39[role="button"][aria-label="Favoris"]');
+        const favoritesCard = findRootGrid(panel)?.favoritesCard;
 
         if (target.type === "imports") {
             finishRestore();
@@ -808,7 +1424,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const cards = panel?.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
         if (!cards || cards.length === 0) return null;
         const favoritesCard = cards[0];
-        if (favoritesCard.getAttribute("aria-label") !== "Favoris") return null;
+        if (!favoritesCard.querySelector('[class*="categoryText"], [class*="categoryName"]')) return null;
         const wrapper = favoritesCard.parentElement;
         if (!wrapper) return null;
         return { favoritesCard, wrapper };
@@ -870,8 +1486,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         button = document.createElement("button");
         button.type = "button";
         button.className = "vc-gif-import";
-        button.title = "Importer des GIF";
-        button.setAttribute("aria-label", "Importer des GIF");
+        button.title = t("importButton");
+        button.setAttribute("aria-label", t("importButton"));
         button.innerHTML = `
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
                 <path d="M12 16V4m0 0L8 8m4-4 4 4M5 15v4h14v-4"
@@ -916,13 +1532,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         card.style.position = "absolute";
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
-        card.setAttribute("aria-label", "Importés");
+        card.setAttribute("aria-label", t("categoryName"));
         card.innerHTML = `
             <img class="vc-imported-category-preview" alt="" draggable="false">
             <div class="vc-imported-category-fade"></div>
             <div class="categoryText_d02962 vc-imported-category-text">
                 ${UPLOAD_ICON}
-                <span class="categoryName_d02962">Importés</span>
+                <span class="categoryName_d02962">${t("categoryName")}</span>
             </div>
             <span class="vc-imported-category-count"></span>`;
 
@@ -970,7 +1586,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
             const firstHeight = parseFloat(first?.style.height) || 0;
             const uniform = cards.every(card => Math.abs((parseFloat(card.style.height) || 0) - firstHeight) < 0.5);
-            if (first?.getAttribute("aria-label") === "Favoris" && uniform) reflowRootGrid(wrapper);
+            if (first?.querySelector('[class*="categoryText"], [class*="categoryName"]') && uniform) {
+                reflowRootGrid(wrapper);
+            }
         }
     }
 
@@ -1004,7 +1622,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                     return;
                 }
                 const label = card.getAttribute("aria-label");
-                if (label && label !== "Importés") handleViewTracking({ type: "category", label });
+                if (label) handleViewTracking({ type: "category", label });
             });
         }
 
@@ -1017,22 +1635,22 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         view.className = "vc-imported-view";
         view.innerHTML = `
             <div class="vc-imported-header">
-                <div class="vc-imported-back" role="button" tabindex="0" aria-label="Retour">${BACK_ICON}</div>
-                <h3 class="vc-imported-title">Importés</h3>
+                <div class="vc-imported-back" role="button" tabindex="0" aria-label="${t("back")}">${BACK_ICON}</div>
+                <h3 class="vc-imported-title">${t("categoryName")}</h3>
                 <span class="vc-imported-count"></span>
                 <div class="vc-imported-search">
                     <div class="vc-imported-search-icon">${SEARCH_ICON}</div>
                     <input class="vc-imported-search-input" type="text" role="searchbox"
-                        placeholder="Rechercher dans les importés"
-                        aria-label="Rechercher dans les importés">
+                        placeholder="${t("searchPlaceholder")}"
+                        aria-label="${t("searchPlaceholder")}">
                     <div class="vc-imported-search-clear" role="button" tabindex="0"
-                        aria-label="Effacer" data-visible="false">${CLEAR_ICON}</div>
+                        aria-label="${t("clear")}" data-visible="false">${CLEAR_ICON}</div>
                 </div>
             </div>
             <div class="vc-imported-scroll">
                 <div class="vc-imported-grid"></div>
                 <div class="vc-imported-empty">
-                    <span>Aucun GIF importé pour le moment</span>
+                    <span>${t("emptyImports")}</span>
                 </div>
             </div>`;
 
@@ -1122,16 +1740,16 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (imports.length === 0) {
             count.textContent = "";
         } else if (query) {
-            count.textContent = `${visibleImports.length} résultat${visibleImports.length > 1 ? "s" : ""}`;
+            count.textContent = t("countResults", { count: visibleImports.length });
         } else {
-            count.textContent = `${imports.length} GIF${imports.length > 1 ? "s" : ""}`;
+            count.textContent = t("countGifs", { count: imports.length });
         }
 
         const emptyLabel = empty.querySelector("span");
         if (emptyLabel) {
             emptyLabel.textContent = query
-                ? `Aucun résultat pour « ${importedQuery.trim()} »`
-                : "Aucun GIF importé pour le moment";
+                ? t("noResults", { query: importedQuery.trim() })
+                : t("emptyImports");
         }
         empty.style.display = visibleImports.length === 0 ? "flex" : "none";
         grid.style.display = "grid";
@@ -1142,10 +1760,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             addTile.type = "button";
             addTile.className = "vc-imported-tile vc-imported-add";
             addTile.dataset.aspect = "1";
-            addTile.setAttribute("aria-label", "Importer des GIF");
+            addTile.setAttribute("aria-label", t("importButton"));
             addTile.innerHTML = `
                 <span class="vc-imported-add-icon">${UPLOAD_ICON}</span>
-                <span class="vc-imported-add-label">Importer</span>`;
+                <span class="vc-imported-add-label">${t("importTile")}</span>`;
             addTile.addEventListener("click", event => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1164,7 +1782,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const attach = document.createElement("button");
             attach.type = "button";
             attach.className = "vc-imported-attach";
-            attach.setAttribute("aria-label", `Ajouter ${record.name} au message`);
+            attach.setAttribute("aria-label", t("addToMessage", { name: record.name }));
 
             const image = document.createElement("img");
             image.src = objectUrls.get(record.id) || "";
@@ -1185,7 +1803,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             favorite.className = `favButton__2dc39 gifFavoriteButton__43deb vc-imported-favorite${isFavorite ? " selected__43deb" : ""}`;
             favorite.setAttribute("role", "button");
             favorite.setAttribute("tabindex", "0");
-            favorite.setAttribute("aria-label", isFavorite ? "Retirer des favoris" : "Ajouter aux favoris");
+            favorite.setAttribute("aria-label", isFavorite ? t("removeFavorite") : t("addFavorite"));
             favorite.innerHTML = STAR_ICON;
 
             const toggleFavorite = event => {
@@ -1193,13 +1811,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 event.stopPropagation();
                 const keys = [...new Set(getFavoriteKeysForRecord(record))];
                 if (keys.length === 0) {
-                    setStatus("Envoie d'abord ce GIF pour le mettre en favori");
+                    setStatus(t("favoriteNeedsSend"));
                     return;
                 }
 
                 const unfavorite = getUnfavoriteAction();
                 if (!unfavorite) {
-                    setStatus("Impossible de modifier les favoris", true);
+                    setStatus(t("favoriteFailed"), true);
                     return;
                 }
 
@@ -1210,7 +1828,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                         console.error("[PickerImport] Failed to remove favorite", error);
                     }
                 }
-                setStatus("GIF retiré des favoris");
+                setStatus(t("favoriteRemoved"));
                 setTimeout(() => renderImportedView(true), 350);
             };
             favorite.addEventListener("click", toggleFavorite);
@@ -1222,7 +1840,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             remove.className = "favButton__2dc39 gifFavoriteButton__43deb vc-imported-delete";
             remove.setAttribute("role", "button");
             remove.setAttribute("tabindex", "0");
-            remove.setAttribute("aria-label", `Supprimer ${record.name}`);
+            remove.setAttribute("aria-label", t("deleteImport", { name: record.name }));
             remove.innerHTML = TRASH_ICON;
 
             const activate = event => {
@@ -1377,7 +1995,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         button.className = "favButton__2dc39 gifFavoriteButton__43deb vc-native-delete";
         button.setAttribute("role", "button");
         button.setAttribute("tabindex", "0");
-        button.setAttribute("aria-label", "Supprimer complètement ce GIF importé");
+        button.setAttribute("aria-label", t("deleteCompletely"));
         button.innerHTML = TRASH_ICON;
 
         const activate = event => {
@@ -1463,7 +2081,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             await deleteRecord(record);
         }
 
-        if (favoriteKeys.length > 0) setStatus("GIF et favori supprimés");
+        if (favoriteKeys.length > 0) setStatus(t("deletedWithFavorite"));
     }
 
     function maintain() {
@@ -1578,7 +2196,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const uploadManager = common?.UploadManager;
         const channelId = common?.SelectedChannelStore?.getChannelId?.();
         if (!uploadManager || !channelId) {
-            setStatus("Impossible de joindre le GIF", true);
+            setStatus(t("attachFailed"), true);
             return;
         }
 
@@ -1599,7 +2217,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         const closed = closePicker();
         focusComposerWhenReady();
-        if (!closed) setStatus("GIF joint au message");
+        if (!closed) setStatus(t("attached"));
     }
 
     async function deleteRecord(record) {
@@ -1607,7 +2225,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             await removeImport(record.id);
         } catch (error) {
             console.error("[PickerImport] Failed to delete import", error);
-            setStatus("Impossible de supprimer le GIF", true);
+            setStatus(t("deleteFailed"), true);
             return;
         }
         const url = objectUrls.get(record.id);
@@ -1616,7 +2234,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         imports = imports.filter(item => item.id !== record.id);
         renderImportedView(true);
         updateCategoryCardContent();
-        setStatus("GIF importé supprimé");
+        setStatus(t("deleted"));
     }
 
     async function handleFiles(files) {
@@ -1628,7 +2246,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         let failed = 0;
         for (let index = 0; index < files.length; index++) {
             const file = files[index];
-            setStatus(`Conversion ${index + 1}/${files.length} : ${file.name}`, false, true);
+            setStatus(t("converting", {
+                current: index + 1,
+                total: files.length,
+                name: file.name
+            }), false, true);
             try {
                 const record = await importFile(file);
                 await putImport(record);
@@ -1636,7 +2258,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             } catch (error) {
                 failed++;
                 console.error("[PickerImport]", file.name, error);
-                setStatus(`${file.name} : ${error?.message || "échec de la conversion"}`, true);
+                setStatus(t("conversionFailed", {
+                    name: file.name,
+                    message: error?.message || t("conversionFailedGeneric")
+                }), true);
                 await sleep(1300);
             }
             await yieldUI();
@@ -1647,9 +2272,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (button) button.disabled = false;
         if (added > 0) {
             openImportedView();
-            setStatus(`${added} GIF importé${added > 1 ? "s" : ""}`);
+            setStatus(t("importedCount", { count: added }));
         } else if (failed > 0) {
-            setStatus("Aucun GIF importé", true);
+            setStatus(t("noneImported"), true);
         } else {
             setStatus("");
         }
@@ -1657,7 +2282,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
     async function importFile(file) {
         if (file.size > MAX_INPUT_BYTES) {
-            throw new Error("fichier trop volumineux (max 100 Mo)");
+            throw new Error(t("fileTooLarge"));
         }
 
         const type = (file.type || "").toLowerCase();
@@ -1666,7 +2291,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         if (type === "image/gif" || name.endsWith(".gif")) {
             if (file.size > MAX_OUTPUT_BYTES) {
-                throw new Error("GIF trop lourd (max 8 Mo)");
+                throw new Error(t("gifTooLarge"));
             }
             const dimensions = await measureImage(file);
             result = { blob: file, width: dimensions.width, height: dimensions.height };
@@ -1675,11 +2300,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         } else if (type.startsWith("image/") || /\.(png|jpe?g|webp|avif|apng|bmp)$/i.test(name)) {
             result = await convertImage(file);
         } else {
-            throw new Error("format non pris en charge");
+            throw new Error(t("unsupportedFormat"));
         }
 
         if (!result?.blob || result.blob.size > MAX_OUTPUT_BYTES) {
-            throw new Error("GIF converti trop lourd (max 8 Mo)");
+            throw new Error(t("convertedTooLarge"));
         }
 
         return {
@@ -1709,7 +2334,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 };
                 image.onerror = () => {
                     URL.revokeObjectURL(url);
-                    reject(new Error("image illisible"));
+                    reject(new Error(t("imageUnreadable")));
                 };
                 image.src = url;
             });
@@ -1757,7 +2382,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                     if (index % 2 === 0) await yieldUI();
                 }
 
-                if (frames.length === 0) throw new Error("aucune image décodée");
+                if (frames.length === 0) throw new Error(t("noFrames"));
                 return {
                     blob: encodeFrames(frames, width, height),
                     width,
@@ -1770,7 +2395,12 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             }
         }
 
-        const bitmap = await createImageBitmap(file);
+        let bitmap;
+        try {
+            bitmap = await createImageBitmap(file);
+        } catch {
+            throw new Error(t("imageUnreadable"));
+        }
         const { width, height } = fit(bitmap.width, bitmap.height);
         const canvas = document.createElement("canvas");
         canvas.width = width;
@@ -1799,20 +2429,20 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         try {
             await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error("délai de lecture vidéo dépassé")), 15000);
+                const timeout = setTimeout(() => reject(new Error(t("videoReadTimeout"))), 15000);
                 video.onloadedmetadata = () => {
                     clearTimeout(timeout);
                     resolve();
                 };
                 video.onerror = () => {
                     clearTimeout(timeout);
-                    reject(new Error("format vidéo non pris en charge"));
+                    reject(new Error(t("videoUnsupported")));
                 };
             });
 
             const sourceWidth = video.videoWidth;
             const sourceHeight = video.videoHeight;
-            if (!sourceWidth || !sourceHeight) throw new Error("dimensions vidéo invalides");
+            if (!sourceWidth || !sourceHeight) throw new Error(t("invalidVideoDimensions"));
 
             const { width, height } = fit(sourceWidth, sourceHeight);
             const duration = Number.isFinite(video.duration) && video.duration > 0
@@ -1866,7 +2496,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 if (settled) return;
                 settled = true;
                 video.removeEventListener("seeked", finish);
-                reject(new Error("délai de conversion vidéo dépassé"));
+                reject(new Error(t("videoConvertTimeout")));
             }, 7000);
 
             if (Math.abs(video.currentTime - time) < 0.001 && video.readyState >= 2) {

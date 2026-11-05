@@ -31,6 +31,7 @@ One-click installer, no Vencord build required.
 - The picker remembers the last opened category (root categories,
   Favorites, Importés or a trending category) when it is closed and
   reopened.
+- The interface follows the Discord client language automatically.
 - Survives Discord updates.
 - Survives Vencord updates thanks to a small watcher that re-applies the
   loader when `preload.js` is replaced.
@@ -97,6 +98,13 @@ native favorite. Discord favorites need an uploaded URL, so a GIF that has
 never been sent cannot be added to favorites yet; the star explains this.
 
 Limits: input files up to 100 MB; converted GIFs up to 8 MB.
+
+## Languages
+
+The interface is translated automatically from the Discord client language.
+Supported languages: English, French, Spanish, German, Italian, Portuguese,
+Dutch, Polish, Russian, Japanese, Korean, Chinese (Simplified and
+Traditional) and Turkish. Other client languages fall back to English.
 
 ## Uninstall
 
