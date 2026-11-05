@@ -527,6 +527,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let restoringClick = false;
     let pickerObserver = null;
     let observedDrawer = null;
+    let resizeObserver = null;
+    let observedResizeNode = null;
     let maintainScheduled = false;
 
     const GRID_GAP = 12;
@@ -553,6 +555,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             <path fill="currentColor" fill-rule="evenodd"
                 d="M9 3a2 2 0 0 0-2 2v1H4a1 1 0 0 0 0 2h1v12a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8h1a1 1 0 1 0 0-2h-3V5a2 2 0 0 0-2-2H9Zm6 3V5a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1v1h6ZM8 8v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V8H8Zm2 2a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Zm4 0a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Z"
                 clip-rule="evenodd"/>
+        </svg>`;
+
+    const STAR_ICON = `
+        <svg class="icon__43deb" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"
+            width="20" height="20" fill="none" viewBox="0 0 24 24">
+            <path fill="currentColor"
+                d="M10.81 2.86c.38-1.15 2-1.15 2.38 0l1.89 5.83h6.12c1.2 0 1.71 1.54.73 2.25l-4.95 3.6 1.9 5.82a1.25 1.25 0 0 1-1.93 1.4L12 18.16l-4.95 3.6c-.98.7-2.3-.25-1.92-1.4l1.89-5.82-4.95-3.6a1.25 1.25 0 0 1 .73-2.25h6.12l1.9-5.83Z"/>
         </svg>`;
 
     const SEARCH_ICON = `
@@ -647,6 +656,17 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             scheduleMaintain();
         });
         pickerObserver.observe(drawerNode, { childList: true, subtree: true });
+        scheduleMaintain();
+    }
+
+    function ensureResizeObserver(node) {
+        if (observedResizeNode === node) return;
+        resizeObserver?.disconnect();
+        resizeObserver = null;
+        observedResizeNode = node;
+        if (!node || typeof ResizeObserver !== "function") return;
+        resizeObserver = new ResizeObserver(() => scheduleMaintain());
+        resizeObserver.observe(node);
         scheduleMaintain();
     }
 
@@ -1073,7 +1093,20 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function renderImportedView(force = false) {
         if (!overlay?.isConnected) return;
 
-        const key = imports.map(record => record.id).join("|");
+        const nativeMatches = getImportedNativeMatches();
+        const favoriteKeysById = new Map();
+        for (const { record, entry } of nativeMatches) {
+            let keys = favoriteKeysById.get(record.id);
+            if (!keys) {
+                keys = new Set();
+                favoriteKeysById.set(record.id, keys);
+            }
+            keys.add(entry.key);
+        }
+
+        const key = imports
+            .map(record => `${record.id}:${favoriteKeysById.has(record.id) ? "1" : "0"}`)
+            .join("|");
         if (!force && key === overlayKey) return;
         overlayKey = key;
 
@@ -1145,6 +1178,46 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 attachToComposer(record);
             });
 
+            const favoriteKeys = favoriteKeysById.get(record.id);
+            const isFavorite = !!favoriteKeys?.size;
+
+            const favorite = document.createElement("div");
+            favorite.className = `favButton__2dc39 gifFavoriteButton__43deb vc-imported-favorite${isFavorite ? " selected__43deb" : ""}`;
+            favorite.setAttribute("role", "button");
+            favorite.setAttribute("tabindex", "0");
+            favorite.setAttribute("aria-label", isFavorite ? "Retirer des favoris" : "Ajouter aux favoris");
+            favorite.innerHTML = STAR_ICON;
+
+            const toggleFavorite = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                const keys = [...new Set(getFavoriteKeysForRecord(record))];
+                if (keys.length === 0) {
+                    setStatus("Envoie d'abord ce GIF pour le mettre en favori");
+                    return;
+                }
+
+                const unfavorite = getUnfavoriteAction();
+                if (!unfavorite) {
+                    setStatus("Impossible de modifier les favoris", true);
+                    return;
+                }
+
+                for (const key of keys) {
+                    try {
+                        unfavorite(key);
+                    } catch (error) {
+                        console.error("[PickerImport] Failed to remove favorite", error);
+                    }
+                }
+                setStatus("GIF retiré des favoris");
+                setTimeout(() => renderImportedView(true), 350);
+            };
+            favorite.addEventListener("click", toggleFavorite);
+            favorite.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") toggleFavorite(event);
+            });
+
             const remove = document.createElement("div");
             remove.className = "favButton__2dc39 gifFavoriteButton__43deb vc-imported-delete";
             remove.setAttribute("role", "button");
@@ -1162,7 +1235,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 if (event.key === "Enter" || event.key === " ") activate(event);
             });
 
-            tile.append(attach, remove);
+            tile.append(attach, favorite, remove);
             grid.appendChild(tile);
         }
 
@@ -1412,6 +1485,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
 
         ensurePickerObserver(currentDrawer?.isConnected ? currentDrawer : null);
+        ensureResizeObserver(currentDrawer?.isConnected ? currentDrawer : null);
 
         if (!drawer?.isConnected) {
             drawer = null;
@@ -1484,6 +1558,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return false;
     }
 
+    function focusComposerWhenReady(attempt = 0) {
+        if (findDrawer()) {
+            if (attempt < 12) setTimeout(() => focusComposerWhenReady(attempt + 1), 50);
+            return;
+        }
+
+        const editor = document.querySelector('[data-slate-editor="true"]');
+        if (editor?.isConnected) {
+            editor.focus();
+            if (document.activeElement === editor) return;
+        }
+
+        if (attempt < 12) setTimeout(() => focusComposerWhenReady(attempt + 1), 50);
+    }
+
     function attachToComposer(record) {
         const common = window.Vencord?.Webpack?.Common;
         const uploadManager = common?.UploadManager;
@@ -1509,9 +1598,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         });
 
         const closed = closePicker();
-        requestAnimationFrame(() => {
-            document.querySelector('[data-slate-editor="true"]')?.focus?.();
-        });
+        focusComposerWhenReady();
         if (!closed) setStatus("GIF joint au message");
     }
 
@@ -1908,7 +1995,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     min-height: 53px;
     padding: 0 16px 12px;
     box-sizing: border-box;
-    background: var(--background-base-lower);
+    background: var(--background-surface-high);
+    border-bottom: 1px solid var(--border-subtle);
 }
 .vc-imported-back {
     display: flex;
@@ -2085,12 +2173,18 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     outline: 2px solid var(--border-focus);
     outline-offset: -2px;
 }
-.vc-imported-delete {
+.vc-imported-delete,
+.vc-imported-favorite {
     cursor: pointer;
     opacity: 0;
 }
+.vc-imported-delete {
+    inset-inline-end: 40px;
+}
 .vc-imported-tile:hover .vc-imported-delete,
-.vc-imported-tile:focus-within .vc-imported-delete {
+.vc-imported-tile:hover .vc-imported-favorite,
+.vc-imported-tile:focus-within .vc-imported-delete,
+.vc-imported-tile:focus-within .vc-imported-favorite {
     opacity: 1;
     transform: none;
 }
@@ -2098,8 +2192,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 .vc-imported-delete:focus {
     color: var(--status-danger);
 }
+.vc-imported-favorite:hover,
+.vc-imported-favorite:focus {
+    color: var(--yellow-300);
+}
 @media (hover: none) {
-    .vc-imported-delete {
+    .vc-imported-delete,
+    .vc-imported-favorite {
         opacity: 1;
         transform: none;
     }
@@ -2154,6 +2253,14 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             return;
         }
         injectStyle();
+        window.addEventListener("resize", scheduleMaintain, { passive: true });
+        document.addEventListener("click", event => {
+            const tile = event.target.closest?.('.result__2dc39[role="button"]');
+            if (!tile) return;
+            if (event.target.closest?.('[class*="favButton"]')) return;
+            if (!document.querySelector('[class*="favoritesHeader"]')) return;
+            focusComposerWhenReady();
+        }, true);
         setInterval(maintain, 250);
         maintain();
         loadImports();

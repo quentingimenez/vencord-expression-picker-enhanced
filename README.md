@@ -23,6 +23,11 @@ One-click installer, no Vencord build required.
 - Hovering an imported GIF in **Favorites** shows a delete button with the
   same design as Discord's favorite button. It removes both the native
   favorite and the local import in one click.
+- Imported tiles also show the same star button as native GIFs. It removes
+  the matching Discord favorite, or explains that the GIF must be sent once
+  before it can be added to Discord's favorites.
+- The category grid stays aligned while the window or the picker is
+  resized.
 - The picker remembers the last opened category (root categories,
   Favorites, Importés or a trending category) when it is closed and
   reopened.
@@ -87,7 +92,9 @@ normal file attachments rather than provider GIF links. They stay visible
 in **Importés** even if you also save them in Discord's native favorites.
 The delete button removes both the native favorite and the local import in
 one click; the same button appears on hover on the matching tile in
-**Favorites**.
+**Favorites**. The star button on an imported tile removes the matching
+native favorite. Discord favorites need an uploaded URL, so a GIF that has
+never been sent cannot be added to favorites yet; the star explains this.
 
 Limits: input files up to 100 MB; converted GIFs up to 8 MB.
 
