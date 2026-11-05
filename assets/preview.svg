@@ -49,15 +49,6 @@
     <circle cx="1140" cy="696" r="14" fill="#2b2d31"/>
   </g>
 
-  <!-- annotation -->
-  <g font-family="Segoe UI, Arial, sans-serif">
-    <text x="40" y="66" fill="#dbdee1" font-size="21" font-weight="600">Resize</text>
-    <text x="40" y="92" fill="#949ba4" font-size="14">Drag the small grip in the</text>
-    <text x="40" y="112" fill="#949ba4" font-size="14">picker's top-left corner.</text>
-    <path d="M208 78 C 220 78, 226 86, 233 96" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
-    <path d="M228 92 L 233 97 L 225 98" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-
   <!-- picker panel -->
   <g filter="url(#shadow)">
     <rect x="230" y="80" width="740" height="560" rx="10" fill="#2b2d31" stroke="#111214" stroke-width="1"/>
@@ -68,7 +59,7 @@
     <rect x="250" y="100" width="44" height="26" rx="6" fill="#5865f2"/>
     <text x="272" y="118" fill="#ffffff" text-anchor="middle">GIF</text>
     <text x="312" y="118" fill="#b5bac1">Stickers</text>
-    <text x="414" y="118" fill="#b5bac1">Emoji</text>
+    <text x="379" y="118" fill="#b5bac1">Emoji</text>
   </g>
 
   <!-- search -->
@@ -138,6 +129,15 @@
     <rect x="234" y="84" width="14" height="14" rx="3" fill="#2b2d31" stroke="#b5bac1" stroke-width="1" stroke-dasharray="2 2" opacity="0.9"/>
     <path d="M237 86 L 245 94 M237 90 L 237 86 L 241 86 M245 90 L 245 94 L 241 94"
           fill="none" stroke="#dbdee1" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- annotation (on top, so the arrow is not hidden by the panel) -->
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="40" y="66" fill="#dbdee1" font-size="21" font-weight="600">Resize</text>
+    <text x="40" y="92" fill="#949ba4" font-size="14">Drag the small grip in the</text>
+    <text x="40" y="112" fill="#949ba4" font-size="14">picker's top-left corner.</text>
+    <path d="M210 78 C 218 78, 226 80, 233 85" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+    <path d="M225.6 83.3 L 233 85 L 229.0 78.5" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
   <!-- bottom caption -->
