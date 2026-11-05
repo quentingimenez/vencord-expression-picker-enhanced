@@ -671,8 +671,12 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                             const name = decodeURIComponent(parsed.pathname.split("/").pop() || "").toLowerCase();
                             if (!name) continue;
                             names.add(name);
-                            if (!sizes.has(name) && gif.width && gif.height) {
-                                sizes.set(name, { width: gif.width, height: gif.height });
+                            if (gif.width && gif.height) {
+                                const list = sizes.get(name) || [];
+                                if (!list.some(size => size.width === gif.width && size.height === gif.height)) {
+                                    list.push({ width: gif.width, height: gif.height });
+                                    sizes.set(name, list);
+                                }
                             }
                         } catch { /* ignore */ }
                     }
@@ -687,10 +691,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function isNativeDuplicate(record, cache = getNativeFavoriteCache()) {
         const name = record.name.toLowerCase();
         if (!cache.names.has(name)) return false;
-        const size = cache.sizes.get(name);
-        if (size?.width && record.width && Math.abs(size.width - record.width) > 2) return false;
-        if (size?.height && record.height && Math.abs(size.height - record.height) > 2) return false;
-        return true;
+
+        const sizes = cache.sizes.get(name);
+        if (!sizes || sizes.length === 0) return true;
+        if (!record.width || !record.height) return true;
+
+        return sizes.some(size =>
+            Math.abs(size.width - record.width) <= 2 &&
+            Math.abs(size.height - record.height) <= 2
+        );
     }
 
     function renderSection(force = false) {
