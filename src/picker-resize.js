@@ -512,13 +512,28 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let categoryCard = null;
     let categoryPreviewId = "";
     let importedView = false;
+    let importedQuery = "";
     let overlay = null;
     let overlayKey = "";
     let overlayLayoutWidth = 0;
 
+    const LAST_VIEW_COOKIE = "vcPickerLastView";
+    let lastView = loadLastView();
+    let pickerWasOpen = false;
+    let panelWasPresent = false;
+    let restorePending = false;
+    let restoreTarget = null;
+    let restoreDeadline = 0;
+    let restoringClick = false;
+    let pickerObserver = null;
+    let observedDrawer = null;
+    let maintainScheduled = false;
+
     const GRID_GAP = 12;
     const DESIRED_TILE_WIDTH = 200;
     const MAX_COLUMNS = 8;
+    const MAX_ROOT_COLUMNS = 6;
+    const ROOT_TILE_HEIGHT = 110;
 
     const BACK_ICON = `
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
@@ -530,6 +545,28 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             <path d="M12 16V4m0 0L8 8m4-4 4 4M5 15v4h14v-4"
                 stroke="currentColor" stroke-width="1.8"
                 stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+
+    const TRASH_ICON = `
+        <svg class="icon__43deb" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg"
+            width="20" height="20" fill="none" viewBox="0 0 24 24">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M9 3a2 2 0 0 0-2 2v1H4a1 1 0 0 0 0 2h1v12a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V8h1a1 1 0 1 0 0-2h-3V5a2 2 0 0 0-2-2H9Zm6 3V5a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1v1h6ZM8 8v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V8H8Zm2 2a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Zm4 0a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-7a1 1 0 0 0-1-1Z"
+                clip-rule="evenodd"/>
+        </svg>`;
+
+    const SEARCH_ICON = `
+        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                clip-rule="evenodd"/>
+        </svg>`;
+
+    const CLEAR_ICON = `
+        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm4.7-15.7a1 1 0 0 0-1.4 0L12 10.58l-3.3-3.3a1 1 0 0 0-1.4 1.42L10.58 12l-3.3 3.3a1 1 0 1 0 1.42 1.4L12 13.42l3.3 3.3a1 1 0 0 0 1.4-1.42L13.42 12l3.3-3.3a1 1 0 0 0 0-1.4Z"
+                clip-rule="evenodd"/>
         </svg>`;
 
     function openDB() {
@@ -587,6 +624,166 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return document.getElementById("gif-picker-tab-panel");
     }
 
+    function scheduleMaintain() {
+        if (maintainScheduled) return;
+        maintainScheduled = true;
+        queueMicrotask(() => {
+            maintainScheduled = false;
+            maintain();
+        });
+    }
+
+    function ensurePickerObserver(drawerNode) {
+        if (observedDrawer === drawerNode) return;
+        pickerObserver?.disconnect();
+        pickerObserver = null;
+        observedDrawer = drawerNode;
+        if (!drawerNode) return;
+        pickerObserver = new MutationObserver(records => {
+            const hasElementMutation = records.some(record =>
+                [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === Node.ELEMENT_NODE)
+            );
+            if (!hasElementMutation) return;
+            scheduleMaintain();
+        });
+        pickerObserver.observe(drawerNode, { childList: true, subtree: true });
+        scheduleMaintain();
+    }
+
+    function normalizeLastView(value) {
+        if (value === "root" || value === "favorites" || value === "imports") {
+            return { type: value };
+        }
+        if (value && ["root", "favorites", "imports"].includes(value.type)) {
+            return { type: value.type };
+        }
+        if (value && value.type === "category" && typeof value.label === "string" && value.label) {
+            return { type: "category", label: value.label };
+        }
+        return { type: "favorites" };
+    }
+
+    function loadLastView() {
+        try {
+            const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${LAST_VIEW_COOKIE}=([^;]+)`));
+            if (match) return normalizeLastView(JSON.parse(decodeURIComponent(match[1])));
+        } catch { /* ignore */ }
+        return { type: "favorites" };
+    }
+
+    function saveLastView(view) {
+        lastView = normalizeLastView(view);
+        try {
+            document.cookie = `${LAST_VIEW_COOKIE}=${encodeURIComponent(JSON.stringify(lastView))}; path=/; max-age=31536000; SameSite=Lax`;
+        } catch { /* ignore */ }
+    }
+
+    function requestRestore() {
+        restorePending = true;
+        restoreTarget = normalizeLastView(lastView);
+        restoreDeadline = Date.now() + 5000;
+    }
+
+    function finishRestore() {
+        restorePending = false;
+        restoreTarget = null;
+    }
+
+    function clickForRestore(element) {
+        if (!element) return;
+        restoringClick = true;
+        try {
+            element.click();
+        } finally {
+            restoringClick = false;
+        }
+    }
+
+    function handleViewTracking(view) {
+        if (!restoringClick) finishRestore();
+        saveLastView(view);
+    }
+
+    function tryRestore(panel) {
+        if (!restorePending) return;
+        if (Date.now() > restoreDeadline) {
+            finishRestore();
+            return;
+        }
+        if (!panel) return;
+
+        const target = restoreTarget || lastView;
+        const backButton = panel.querySelector(".backButton_fed6d3");
+        const hasBack = !!backButton;
+        const favoritesView = !!panel.querySelector('[class*="favoritesHeader"]');
+        const searchValue = panel.querySelector('input[role="searchbox"]')?.value?.trim() || "";
+        const favoritesCard = panel.querySelector('.content_fed6d3 .result__2dc39[role="button"][aria-label="Favoris"]');
+
+        if (target.type === "imports") {
+            finishRestore();
+            openImportedView();
+            return;
+        }
+
+        if (target.type === "favorites") {
+            if (!hasBack) {
+                if (favoritesCard) {
+                    finishRestore();
+                    clickForRestore(favoritesCard);
+                }
+                return;
+            }
+            if (favoritesView) {
+                finishRestore();
+                return;
+            }
+            clickForRestore(backButton);
+            return;
+        }
+
+        if (target.type === "root") {
+            if (!hasBack) {
+                if (favoritesCard) {
+                    finishRestore();
+                    return;
+                }
+                const clearButton = panel.querySelector('[class*="clearButton"]');
+                if (searchValue && clearButton) {
+                    clickForRestore(clearButton);
+                    return;
+                }
+                finishRestore();
+                return;
+            }
+            clickForRestore(backButton);
+            return;
+        }
+
+        if (target.type === "category") {
+            if (!hasBack) {
+                const card = [...panel.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]')]
+                    .find(item => item.getAttribute("aria-label") === target.label);
+                if (card) {
+                    finishRestore();
+                    clickForRestore(card);
+                }
+                return;
+            }
+            if (searchValue === target.label) {
+                finishRestore();
+                return;
+            }
+            clickForRestore(backButton);
+        }
+    }
+
+    function trackNativeBackButton(panel) {
+        const backButton = panel?.querySelector(".backButton_fed6d3");
+        if (!backButton || backButton.dataset.vcViewTracking) return;
+        backButton.dataset.vcViewTracking = "1";
+        backButton.addEventListener("click", () => handleViewTracking({ type: "root" }), true);
+    }
+
     function findRootGrid(panel) {
         const cards = panel?.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
         if (!cards || cards.length === 0) return null;
@@ -605,28 +802,27 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     }
 
     function reflowRootGrid(wrapper) {
-        const cards = [...wrapper.children].filter(child =>
-            child.classList?.contains("result__2dc39") && child.style.position === "absolute"
-        );
+        const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
         if (cards.length === 0) return;
 
-        const first = cards[0];
-        const width = parseFloat(first.style.width) || 186.5;
-        const height = parseFloat(first.style.height) || 110;
-        const left = parseFloat(first.style.left) || GRID_GAP;
-        const wrapperWidth = wrapper.clientWidth || wrapper.parentElement?.clientWidth || 806;
-        const columns = Math.max(1, Math.floor((wrapperWidth - left * 2 + GRID_GAP) / (width + GRID_GAP)));
+        const containerWidth = wrapper.clientWidth || wrapper.parentElement?.clientWidth || 806;
+        const columns = Math.min(
+            Math.max(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1),
+            MAX_ROOT_COLUMNS
+        );
+        const tileWidth = (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns;
 
         for (let index = 0; index < cards.length; index++) {
             const card = cards[index];
-            card.style.left = `${left + (index % columns) * (width + GRID_GAP)}px`;
-            card.style.top = `${Math.floor(index / columns) * (height + GRID_GAP)}px`;
-            card.style.width = `${width}px`;
-            card.style.height = `${height}px`;
+            card.style.position = "absolute";
+            card.style.left = `${GRID_GAP + (index % columns) * (tileWidth + GRID_GAP)}px`;
+            card.style.top = `${Math.floor(index / columns) * (ROOT_TILE_HEIGHT + GRID_GAP)}px`;
+            card.style.width = `${tileWidth}px`;
+            card.style.height = `${ROOT_TILE_HEIGHT}px`;
         }
 
         const rows = Math.ceil(cards.length / columns);
-        const needed = rows * (height + GRID_GAP) - GRID_GAP;
+        const needed = rows * (ROOT_TILE_HEIGHT + GRID_GAP) - GRID_GAP;
         const current = parseFloat(wrapper.style.height) || 0;
         if (current < needed) wrapper.style.height = `${needed}px`;
     }
@@ -740,7 +936,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
 
         const count = categoryCard.querySelector(".vc-imported-category-count");
-        count.textContent = imports.length > 0 ? String(imports.length) : "";
+        const countText = imports.length > 0 ? String(imports.length) : "";
+        if (count.textContent !== countText) count.textContent = countText;
         count.style.display = imports.length > 0 ? "flex" : "none";
     }
 
@@ -748,8 +945,6 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!categoryCard) return;
         const wrapper = categoryCard.parentElement;
         categoryCard.remove();
-        categoryCard = null;
-        categoryPreviewId = "";
         if (wrapper) {
             const first = wrapper.firstElementChild;
             const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
@@ -771,10 +966,26 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             return;
         }
 
-        if (!categoryCard || !categoryCard.isConnected || categoryCard.parentElement !== grid.wrapper) {
-            categoryCard?.remove();
+        if (!categoryCard) {
             categoryCard = createCategoryCard();
+        }
+        if (!categoryCard.isConnected
+            || categoryCard.parentElement !== grid.wrapper
+            || grid.favoritesCard.nextElementSibling !== categoryCard) {
             grid.favoritesCard.after(categoryCard);
+        }
+
+        for (const card of grid.wrapper.children) {
+            if (card === categoryCard || !card.classList?.contains("result__2dc39") || card.dataset.vcViewTracking) continue;
+            card.dataset.vcViewTracking = "1";
+            card.addEventListener("click", () => {
+                if (card === grid.wrapper.firstElementChild) {
+                    handleViewTracking({ type: "favorites" });
+                    return;
+                }
+                const label = card.getAttribute("aria-label");
+                if (label && label !== "Importés") handleViewTracking({ type: "category", label });
+            });
         }
 
         updateCategoryCardContent();
@@ -789,6 +1000,14 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 <div class="vc-imported-back" role="button" tabindex="0" aria-label="Retour">${BACK_ICON}</div>
                 <h3 class="vc-imported-title">Importés</h3>
                 <span class="vc-imported-count"></span>
+                <div class="vc-imported-search">
+                    <div class="vc-imported-search-icon">${SEARCH_ICON}</div>
+                    <input class="vc-imported-search-input" type="text" role="searchbox"
+                        placeholder="Rechercher dans les importés"
+                        aria-label="Rechercher dans les importés">
+                    <div class="vc-imported-search-clear" role="button" tabindex="0"
+                        aria-label="Effacer" data-visible="false">${CLEAR_ICON}</div>
+                </div>
             </div>
             <div class="vc-imported-scroll">
                 <div class="vc-imported-grid"></div>
@@ -801,12 +1020,53 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const close = event => {
             event.preventDefault();
             event.stopPropagation();
+            finishRestore();
             closeImportedView();
+            saveLastView({ type: "root" });
+            document.querySelector(".backButton_fed6d3")?.click();
         };
         back.addEventListener("click", close);
         back.addEventListener("keydown", event => {
             if (event.key === "Enter" || event.key === " ") close(event);
         });
+
+        const searchInput = view.querySelector(".vc-imported-search-input");
+        const clearButton = view.querySelector(".vc-imported-search-clear");
+        searchInput.value = importedQuery;
+        const syncClear = () => {
+            clearButton.dataset.visible = searchInput.value ? "true" : "false";
+        };
+        const runSearch = () => {
+            importedQuery = searchInput.value;
+            syncClear();
+            renderImportedView(true);
+        };
+        searchInput.addEventListener("input", runSearch);
+        searchInput.addEventListener("keydown", event => {
+            if (event.key === "Escape" && searchInput.value) {
+                event.preventDefault();
+                searchInput.value = "";
+                importedQuery = "";
+                syncClear();
+                renderImportedView(true);
+            }
+        });
+
+        const clear = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            searchInput.value = "";
+            importedQuery = "";
+            syncClear();
+            renderImportedView(true);
+            searchInput.focus();
+        };
+        clearButton.addEventListener("click", clear);
+        clearButton.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") clear(event);
+        });
+        syncClear();
+
         return view;
     }
 
@@ -821,29 +1081,47 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const empty = overlay.querySelector(".vc-imported-empty");
         const count = overlay.querySelector(".vc-imported-count");
 
-        count.textContent = imports.length === 0
-            ? ""
-            : `${imports.length} GIF${imports.length > 1 ? "s" : ""}`;
-        empty.style.display = imports.length === 0 ? "flex" : "none";
+        const query = importedQuery.trim().toLowerCase();
+        const visibleImports = query
+            ? imports.filter(record => record.name.toLowerCase().includes(query))
+            : imports;
+
+        if (imports.length === 0) {
+            count.textContent = "";
+        } else if (query) {
+            count.textContent = `${visibleImports.length} résultat${visibleImports.length > 1 ? "s" : ""}`;
+        } else {
+            count.textContent = `${imports.length} GIF${imports.length > 1 ? "s" : ""}`;
+        }
+
+        const emptyLabel = empty.querySelector("span");
+        if (emptyLabel) {
+            emptyLabel.textContent = query
+                ? `Aucun résultat pour « ${importedQuery.trim()} »`
+                : "Aucun GIF importé pour le moment";
+        }
+        empty.style.display = visibleImports.length === 0 ? "flex" : "none";
         grid.style.display = "grid";
         grid.textContent = "";
 
-        const addTile = document.createElement("button");
-        addTile.type = "button";
-        addTile.className = "vc-imported-tile vc-imported-add";
-        addTile.dataset.aspect = "1";
-        addTile.setAttribute("aria-label", "Importer des GIF");
-        addTile.innerHTML = `
-            <span class="vc-imported-add-icon">${UPLOAD_ICON}</span>
-            <span class="vc-imported-add-label">Importer</span>`;
-        addTile.addEventListener("click", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!busy) input?.click();
-        });
-        grid.appendChild(addTile);
+        if (!query) {
+            const addTile = document.createElement("button");
+            addTile.type = "button";
+            addTile.className = "vc-imported-tile vc-imported-add";
+            addTile.dataset.aspect = "1";
+            addTile.setAttribute("aria-label", "Importer des GIF");
+            addTile.innerHTML = `
+                <span class="vc-imported-add-icon">${UPLOAD_ICON}</span>
+                <span class="vc-imported-add-label">Importer</span>`;
+            addTile.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (!busy) input?.click();
+            });
+            grid.appendChild(addTile);
+        }
 
-        for (const record of imports) {
+        for (const record of visibleImports) {
             const tile = document.createElement("div");
             tile.className = "vc-imported-tile";
             tile.dataset.aspect = record.width && record.height
@@ -867,15 +1145,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 attachToComposer(record);
             });
 
-            const remove = document.createElement("button");
-            remove.type = "button";
-            remove.className = "vc-imported-delete";
+            const remove = document.createElement("div");
+            remove.className = "favButton__2dc39 gifFavoriteButton__43deb vc-imported-delete";
+            remove.setAttribute("role", "button");
+            remove.setAttribute("tabindex", "0");
             remove.setAttribute("aria-label", `Supprimer ${record.name}`);
-            remove.textContent = "×";
-            remove.addEventListener("click", event => {
+            remove.innerHTML = TRASH_ICON;
+
+            const activate = event => {
                 event.preventDefault();
                 event.stopPropagation();
-                deleteRecord(record);
+                deleteImportedCompletely([record], getFavoriteKeysForRecord(record));
+            };
+            remove.addEventListener("click", activate);
+            remove.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") activate(event);
             });
 
             tile.append(attach, remove);
@@ -889,10 +1173,16 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!overlay?.isConnected) return;
         const grid = overlay.querySelector(".vc-imported-grid");
         const tiles = [...(grid?.children || [])];
-        if (!grid || tiles.length === 0) return;
+        if (!grid) return;
 
         const containerWidth = overlay.clientWidth;
         if (!containerWidth) return;
+
+        if (tiles.length === 0) {
+            grid.style.width = `${containerWidth}px`;
+            grid.style.height = "0px";
+            return;
+        }
         if (!force && containerWidth === overlayLayoutWidth) return;
         overlayLayoutWidth = containerWidth;
 
@@ -923,12 +1213,18 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function openImportedView() {
         const panel = findPanel();
         if (!panel) return;
+        finishRestore();
+        saveLastView({ type: "imports" });
         importedView = true;
         maintainImportedView(panel);
+        requestAnimationFrame(() => {
+            overlay?.querySelector(".vc-imported-search-input")?.focus();
+        });
     }
 
     function closeImportedView() {
         importedView = false;
+        importedQuery = "";
         overlay?.remove();
         overlay = null;
         overlayKey = "";
@@ -953,9 +1249,161 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         layoutImportedTiles();
     }
 
+    function getNativeFavoriteEntries() {
+        const gifs = window.Vencord?.Webpack?.Common?.UserSettingsProtoStore
+            ?.frecencyWithoutFetchingLatest?.favoriteGifs?.gifs;
+        if (!gifs) return [];
+
+        const entries = [];
+        for (const [key, gif] of Object.entries(gifs)) {
+            const src = gif.src || gif.url || gif.gifSrc;
+            if (!src) continue;
+            try {
+                const pathname = new URL(src, location.href).pathname.toLowerCase();
+                const name = decodeURIComponent(pathname.split("/").pop() || "").toLowerCase();
+                if (!name) continue;
+                entries.push({ key, pathname, name, width: gif.width, height: gif.height });
+            } catch { /* ignore */ }
+        }
+        return entries;
+    }
+
+    function getImportedNativeMatches() {
+        const entries = getNativeFavoriteEntries();
+        const matches = [];
+
+        for (const record of imports) {
+            const name = record.name.toLowerCase();
+            for (const entry of entries) {
+                if (entry.name !== name) continue;
+                if (entry.width && record.width && Math.abs(entry.width - record.width) > 2) continue;
+                if (entry.height && record.height && Math.abs(entry.height - record.height) > 2) continue;
+                matches.push({ record, entry });
+            }
+        }
+
+        return matches;
+    }
+
+    function getFavoriteKeysForRecord(record) {
+        return getImportedNativeMatches()
+            .filter(match => match.record.id === record.id)
+            .map(match => match.entry.key);
+    }
+
+    function getUnfavoriteAction() {
+        try {
+            const module = window.Vencord?.Webpack?.findByProps?.("Tr", "wg");
+            if (typeof module?.Tr === "function") return module.Tr;
+        } catch { /* ignore */ }
+        return null;
+    }
+
+    function createNativeDeleteButton() {
+        const button = document.createElement("div");
+        button.className = "favButton__2dc39 gifFavoriteButton__43deb vc-native-delete";
+        button.setAttribute("role", "button");
+        button.setAttribute("tabindex", "0");
+        button.setAttribute("aria-label", "Supprimer complètement ce GIF importé");
+        button.innerHTML = TRASH_ICON;
+
+        const activate = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const records = button.__records || [];
+            const favoriteKeys = button.__favoriteKeys || [];
+            deleteImportedCompletely(records, favoriteKeys);
+        };
+        button.addEventListener("click", activate);
+        button.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") activate(event);
+        });
+        return button;
+    }
+
+    function maintainNativeDeleteButtons(panel) {
+        const favoritesView = !!panel?.querySelector('[class*="favoritesHeader"]');
+        if (!favoritesView) {
+            panel?.querySelectorAll(".vc-native-delete").forEach(button => button.remove());
+            return;
+        }
+
+        const matches = getImportedNativeMatches();
+        const byPath = new Map();
+        for (const { record, entry } of matches) {
+            let match = byPath.get(entry.pathname);
+            if (!match) {
+                match = { records: [], entries: [] };
+                byPath.set(entry.pathname, match);
+            }
+            if (!match.records.includes(record)) match.records.push(record);
+            if (!match.entries.includes(entry)) match.entries.push(entry);
+        }
+
+        const seen = new Set();
+        const tiles = panel.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
+        for (const tile of tiles) {
+            const media = tile.querySelector("img, video");
+            const src = media?.currentSrc || media?.src;
+            if (!src) continue;
+
+            let pathname;
+            try {
+                pathname = new URL(src, location.href).pathname.toLowerCase();
+            } catch {
+                continue;
+            }
+
+            const match = byPath.get(pathname);
+            if (!match) continue;
+
+            seen.add(tile);
+            let button = tile.querySelector(".vc-native-delete");
+            if (!button) {
+                button = createNativeDeleteButton();
+                tile.appendChild(button);
+            }
+            button.__records = match.records;
+            button.__favoriteKeys = match.entries.map(entry => entry.key);
+        }
+
+        panel.querySelectorAll(".vc-native-delete").forEach(button => {
+            if (!seen.has(button.parentElement)) button.remove();
+        });
+    }
+
+    async function deleteImportedCompletely(records, favoriteKeys) {
+        if (!records?.length) return;
+
+        const unfavorite = getUnfavoriteAction();
+        if (unfavorite) {
+            for (const key of new Set(favoriteKeys)) {
+                try {
+                    unfavorite(key);
+                } catch (error) {
+                    console.error("[PickerImport] Failed to remove native favorite", error);
+                }
+            }
+        }
+
+        for (const record of records) {
+            await deleteRecord(record);
+        }
+
+        if (favoriteKeys.length > 0) setStatus("GIF et favori supprimés");
+    }
+
     function maintain() {
         const currentDrawer = findDrawer();
         const panel = findPanel();
+        const isOpen = !!currentDrawer?.isConnected;
+
+        if (isOpen && !pickerWasOpen) requestRestore();
+        pickerWasOpen = isOpen;
+
+        const panelPresent = isOpen && !!panel;
+        if (isOpen && panelPresent && !panelWasPresent) requestRestore();
+        panelWasPresent = panelPresent;
 
         if (currentDrawer !== drawer) {
             drawer = currentDrawer;
@@ -963,10 +1411,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             statusEl = drawer?.querySelector(".vc-import-status") ?? null;
         }
 
+        ensurePickerObserver(currentDrawer?.isConnected ? currentDrawer : null);
+
         if (!drawer?.isConnected) {
             drawer = null;
             button = null;
             statusEl = null;
+            finishRestore();
             closeImportedView();
             removeCategoryCard();
             return;
@@ -986,7 +1437,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
 
         maintainCategoryCard(panel);
+        trackNativeBackButton(panel);
+        tryRestore(panel);
         maintainImportedView(panel);
+
+        if (importedView) {
+            panel.querySelectorAll(".vc-native-delete").forEach(button => button.remove());
+        } else {
+            maintainNativeDeleteButtons(panel);
+        }
     }
 
     async function loadImports() {
@@ -1002,6 +1461,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         for (const record of imports) {
             objectUrls.set(record.id, URL.createObjectURL(record.blob));
         }
+        categoryPreviewId = "";
         if (overlay) renderImportedView(true);
         updateCategoryCardContent();
     }
@@ -1446,7 +1906,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     gap: 12px;
     flex: 0 0 auto;
     min-height: 53px;
-    padding: 12px 16px;
+    padding: 0 16px 12px;
     box-sizing: border-box;
     background: var(--background-base-lower);
 }
@@ -1475,8 +1935,73 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     font: 600 16px/20px var(--font-primary, sans-serif);
 }
 .vc-imported-count {
+    flex: 0 0 auto;
     color: var(--text-muted);
     font: 500 12px/16px var(--font-primary, sans-serif);
+}
+.vc-imported-search {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    padding-left: 4px;
+    border: 1px solid var(--input-border-default, transparent);
+    border-radius: 8px;
+    background: var(--input-background-default, var(--background-base-lowest));
+}
+.vc-imported-search:focus-within {
+    border-color: var(--input-border-active, var(--border-focus));
+    outline: 2px solid var(--input-border-active, var(--border-focus));
+    outline-offset: -2px;
+}
+.vc-imported-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    color: var(--icon-strong);
+}
+.vc-imported-search-icon svg {
+    width: 16px;
+    height: 16px;
+}
+.vc-imported-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 38px;
+    padding: 1px 8px 1px 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-default);
+    font: 400 16px/20px var(--font-primary, sans-serif);
+}
+.vc-imported-search-input::placeholder {
+    color: var(--text-muted);
+}
+.vc-imported-search-clear {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.vc-imported-search-clear[data-visible="true"] {
+    display: flex;
+}
+.vc-imported-search-clear:hover {
+    color: var(--text-default);
+}
+.vc-imported-search-clear svg {
+    width: 16px;
+    height: 16px;
 }
 .vc-imported-scroll {
     flex: 1 1 auto;
@@ -1561,27 +2086,23 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     outline-offset: -2px;
 }
 .vc-imported-delete {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.65);
-    color: #fff;
     cursor: pointer;
-    font: 600 16px/1 var(--font-primary, sans-serif);
-    transition: background-color 0.12s, transform 0.12s;
+    opacity: 0;
 }
-.vc-imported-delete:hover {
-    background: var(--status-danger);
-    transform: scale(1.06);
+.vc-imported-tile:hover .vc-imported-delete,
+.vc-imported-tile:focus-within .vc-imported-delete {
+    opacity: 1;
+    transform: none;
+}
+.vc-imported-delete:hover,
+.vc-imported-delete:focus {
+    color: var(--status-danger);
+}
+@media (hover: none) {
+    .vc-imported-delete {
+        opacity: 1;
+        transform: none;
+    }
 }
 .vc-imported-empty {
     display: flex;
@@ -1598,6 +2119,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 .vc-imported-empty small {
     font: 400 12px/16px var(--font-primary, sans-serif);
     opacity: 0.8;
+}
+.vc-native-delete {
+    inset-inline-end: 40px;
+}
+.vc-native-delete:hover,
+.vc-native-delete:focus {
+    color: var(--status-danger);
 }
 .vc-import-status {
     position: absolute;

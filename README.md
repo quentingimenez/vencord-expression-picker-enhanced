@@ -18,8 +18,14 @@ One-click installer, no Vencord build required.
   the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV and
   MKV are accepted and converted to GIF automatically.
 - Imported GIFs appear in a dedicated **Importés** category in the GIF
-  picker, with the same masonry layout as native Favorites. Click one to
-  attach it to the message box.
+  picker, with the same masonry layout, color filter and search bar as
+  native Favorites. Click one to attach it to the message box.
+- Hovering an imported GIF in **Favorites** shows a delete button with the
+  same design as Discord's favorite button. It removes both the native
+  favorite and the local import in one click.
+- The picker remembers the last opened category (root categories,
+  Favorites, Importés or a trending category) when it is closed and
+  reopened.
 - Survives Discord updates.
 - Survives Vencord updates thanks to a small watcher that re-applies the
   loader when `preload.js` is replaced.
@@ -71,12 +77,17 @@ grip handles both dimensions.
    files from there. Imported GIFs use the same masonry sizing as native
    Favorites. Click one to attach it to the message box; the picker closes
    automatically. Press Enter to send it.
+6. Use the search bar at the top of **Importés** to filter imports by
+   filename. The last opened category is remembered for the next time you
+   open the picker.
 
 Imported GIFs are stored **locally** in this Discord installation
 (IndexedDB). They are not synced to other devices, and they are sent as
 normal file attachments rather than provider GIF links. They stay visible
-in **Importés** even if you also save them in Discord's native favorites,
-so use the × button on a thumbnail to delete the local import in one click.
+in **Importés** even if you also save them in Discord's native favorites.
+The delete button removes both the native favorite and the local import in
+one click; the same button appears on hover on the matching tile in
+**Favorites**.
 
 Limits: input files up to 100 MB; converted GIFs up to 8 MB.
 
