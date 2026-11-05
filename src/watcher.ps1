@@ -17,6 +17,11 @@ function Write-Log($message) {
 
 function Ensure-Patch {
     if (-not (Test-Path $preload)) { return }
+    if (-not (Test-Path $installer)) {
+        Write-Log "Installer not found: $installer"
+        return
+    }
+
     try {
         $content = [System.IO.File]::ReadAllText($preload)
         if ($content.Contains($marker)) { return }
@@ -25,11 +30,15 @@ function Ensure-Patch {
     for ($i = 0; $i -lt 20; $i++) {
         try {
             & powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File $installer -FromWatcher
-            Write-Log "Loader re-applied (attempt $($i + 1))"
-            return
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "Loader re-applied (attempt $($i + 1))"
+                return
+            }
+            Write-Log "Installer exited with code $LASTEXITCODE (attempt $($i + 1))"
         } catch {
-            Start-Sleep -Milliseconds 500
+            Write-Log "Installer threw: $($_.Exception.Message)"
         }
+        Start-Sleep -Milliseconds 500
     }
     Write-Log "Failed to re-apply loader"
 }
@@ -43,11 +52,14 @@ $watcher.NotifyFilter = [System.IO.NotifyFilters]::LastWrite -bor [System.IO.Not
 $watcher.EnableRaisingEvents = $true
 
 while ($true) {
-    $change = $watcher.WaitForChanged([System.IO.WatcherChangeTypes]::All, 60000)
-    if (-not $change.TimedOut) {
-        Start-Sleep -Milliseconds 700
+    try {
+        $change = $watcher.WaitForChanged([System.IO.WatcherChangeTypes]::All, 60000)
+        if (-not $change.TimedOut) {
+            Start-Sleep -Milliseconds 700
+        }
         Ensure-Patch
-    } else {
-        Ensure-Patch
+    } catch {
+        Write-Log "Watcher error: $($_.Exception.Message)"
+        Start-Sleep -Seconds 5
     }
 }

@@ -7,6 +7,13 @@ watcher.log
 dist/
 *.zip
 
+# Test and lint tooling
+node_modules/
+coverage/
+.eslintcache
+test-output.txt
+npm-debug.log*
+
 # OS/editor
 .DS_Store
 Thumbs.db

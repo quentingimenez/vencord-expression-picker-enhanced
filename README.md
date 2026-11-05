@@ -19,8 +19,8 @@ One-click installer, no Vencord build required.
 - No more blue flash: GIF tiles stay dark until their first frame is
   ready, then fade in.
 - **Import local files** with the upload button in the top-right corner of
-  the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV and
-  MKV are accepted and converted to GIF automatically.
+  the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV, MKV
+  and M4V are accepted and converted to GIF automatically.
 - Imported GIFs appear in a dedicated **Importés** category in the GIF
   picker, with the same masonry layout, color filter and search bar as
   native Favorites. Click one to attach it to the message box.
@@ -78,6 +78,8 @@ available in the **top-left corner** of the panel:
 
 - drag it up/left to enlarge the picker;
 - drag it down/right to shrink it;
+- focus the grip and use the arrow keys (Shift for larger steps) for
+  keyboard resizing;
 - the size is remembered automatically.
 
 Discord's native width-only handle on the left edge is hidden; the custom
@@ -88,7 +90,7 @@ grip handles both dimensions.
 1. Open the GIF picker.
 2. Click the **upload icon** in the top-right corner of the GIF page.
 3. Select one or more files. Accepted formats: GIF, PNG, JPEG, WebP, AVIF,
-   APNG, BMP, MP4, WebM, MOV and MKV.
+   APNG, BMP, MP4, WebM, MOV, MKV and M4V.
 4. Images and videos are converted to GIF automatically (max 480 px,
    6 seconds, 10 fps, 8 MB output).
 5. Open the **Importés** category in the GIF picker. The first tile has the
@@ -162,6 +164,33 @@ using the bundled `gifenc` encoder; no network access, no telemetry.
 
 Run `installer\build-setup.ps1`. It uses the C# compiler included with
 the .NET Framework and writes `dist\VencordExpressionPickerEnhanced-Setup.exe`.
+
+### Development
+
+The renderer is a single injected file, `src/picker-resize.js`, because the
+preload loader executes one script in the page world. It is organized in one
+IIFE with shared utilities, then the resize feature and the import feature.
+Discord's hashed selectors are centralized in `SELECTORS`; user-visible
+strings live in `MESSAGES`. Keep both in sync when Discord changes its DOM
+or a translation is added.
+
+Install the development tools, then run the checks:
+
+```powershell
+npm install
+npm test
+npm run lint
+npm run format:check
+```
+
+The test suite itself uses Node.js's built-in test runner and has no runtime
+dependencies. It covers size persistence, drag clamping, localization and
+plurals, the last-opened-view cookie, native favorite matching, masonry
+layout, GIF encoding, import validation, and the installer/watcher scripts.
+Node.js 20 or newer is required. Prettier and ESLint are development-only
+dependencies; the bundled `gifenc` block is excluded from both. The quality
+audit and the rationale behind the current structure are documented in
+[`AUDIT.md`](AUDIT.md).
 
 ## Troubleshooting
 

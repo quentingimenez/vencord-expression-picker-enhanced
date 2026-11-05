@@ -1,0 +1,27 @@
+{
+  "name": "vencord-expression-picker-enhanced",
+  "version": "1.7.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Larger, resizable and persistent expression picker for Vencord on Windows",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10"
+  },
+  "overrides": {
+    "minimatch": "^11.0.4"
+  }
+}

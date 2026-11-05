@@ -1,14 +1,17 @@
 /*! gifenc - MIT License - https://github.com/mattdesl/gifenc
  * Bundled for the expression picker import feature.
  */
+/* eslint-disable */
+// prettier-ignore
 var Gifenc=(()=>{var Q=Object.defineProperty;var st=Object.getOwnPropertyDescriptor;var at=Object.getOwnPropertyNames;var ut=Object.prototype.hasOwnProperty;var xt=(t,e)=>{for(var i in e)Q(t,i,{get:e[i],enumerable:!0})},gt=(t,e,i,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let r of at(e))!ut.call(t,r)&&r!==i&&Q(t,r,{get:()=>e[r],enumerable:!(n=st(e,r))||n.enumerable});return t};var bt=t=>gt(Q({},"__esModule",{value:!0}),t);var kt={};xt(kt,{GIFEncoder:()=>ct,applyPalette:()=>rt,default:()=>vt,nearestColor:()=>it,nearestColorIndex:()=>W,nearestColorIndexWithDistance:()=>Z,prequantize:()=>nt,quantize:()=>j,snapColorsToPalette:()=>ot});var J={signature:"GIF",version:"89a",trailer:59,extensionIntroducer:33,applicationExtensionLabel:255,graphicControlExtensionLabel:249,imageSeparator:44,signatureSize:3,versionSize:3,globalColorTableFlagMask:128,colorResolutionMask:112,sortFlagMask:8,globalColorTableSizeMask:7,applicationIdentifierSize:8,applicationAuthCodeSize:3,disposalMethodMask:28,userInputFlagMask:2,transparentColorFlagMask:1,localColorTableFlagMask:128,interlaceFlagMask:64,idSortFlagMask:32,localColorTableSizeMask:7};function U(t=256){let e=0,i=new Uint8Array(t);return{get buffer(){return i.buffer},reset(){e=0},bytesView(){return i.subarray(0,e)},bytes(){return i.slice(0,e)},writeByte(r){n(e+1),i[e]=r,e++},writeBytes(r,o=0,f=r.length){n(e+f);for(let l=0;l<f;l++)i[e++]=r[l+o]},writeBytesView(r,o=0,f=r.byteLength){n(e+f),i.set(r.subarray(o,o+f),e),e+=f}};function n(r){var o=i.length;if(o>=r)return;var f=1024*1024;r=Math.max(r,o*(o<f?2:1.125)>>>0),o!=0&&(r=Math.max(r,256));let l=i;i=new Uint8Array(r),e>0&&i.set(l.subarray(0,e),0)}}var H=12,$=5003,dt=[0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535];function ht(t,e,i,n,r=U(512),o=new Uint8Array(256),f=new Int32Array($),l=new Int32Array($)){let x=f.length,a=Math.max(2,n);o.fill(0),l.fill(0),f.fill(-1);let s=0,c=0,g=a+1,p=g,b=!1,d=p,_=(1<<d)-1,u=1<<g-1,v=u+1,B=u+2,h=0,A=i[0],F=0;for(let y=x;y<65536;y*=2)++F;F=8-F,r.writeByte(a),I(u);let w=i.length;for(let y=1;y<w;y++)t:{let k=i[y],m=(k<<H)+A,M=k<<F^A;if(f[M]===m){A=l[M];break t}let L=M===0?1:x-M;for(;f[M]>=0;)if(M-=L,M<0&&(M+=x),f[M]===m){A=l[M];break t}I(A),A=k,B<1<<H?(l[M]=B++,f[M]=m):(f.fill(-1),B=u+2,b=!0,I(u))}return I(A),I(v),r.writeByte(0),r.bytesView();function I(y){for(s&=dt[c],c>0?s|=y<<c:s=y,c+=d;c>=8;)o[h++]=s&255,h>=254&&(r.writeByte(h),r.writeBytesView(o,0,h),h=0),s>>=8,c-=8;if((B>_||b)&&(b?(d=p,_=(1<<d)-1,b=!1):(++d,_=d===H?1<<d:(1<<d)-1)),y==v){for(;c>0;)o[h++]=s&255,h>=254&&(r.writeByte(h),r.writeBytesView(o,0,h),h=0),s>>=8,c-=8;h>0&&(r.writeByte(h),r.writeBytesView(o,0,h),h=0)}}}var tt=ht;function D(t,e,i){return t<<8&63488|e<<2&992|i>>3}function G(t,e,i,n){return t>>4|e&240|(i&240)<<4|(n&240)<<8}function R(t,e,i){return t>>4<<8|e&240|i>>4}function P(t,e,i){return t<e?e:t>i?i:t}function q(t){return t*t}function et(t,e,i){var n=0,r=1e100;let o=t[e],f=o.cnt,l=o.ac,x=o.rc,a=o.gc,s=o.bc;for(var c=o.fw;c!=0;c=t[c].fw){let p=t[c],b=p.cnt,d=f*b/(f+b);if(!(d>=r)){var g=0;i&&(g+=d*q(p.ac-l),g>=r)||(g+=d*q(p.rc-x),!(g>=r)&&(g+=d*q(p.gc-a),!(g>=r)&&(g+=d*q(p.bc-s),!(g>=r)&&(r=g,n=c))))}}o.err=r,o.nn=n}function N(){return{ac:0,rc:0,gc:0,bc:0,cnt:0,nn:0,fw:0,bk:0,tm:0,mtm:0,err:0}}function wt(t,e){let i=e==="rgb444"?4096:65536,n=new Array(i),r=t.length;if(e==="rgba4444")for(let o=0;o<r;++o){let f=t[o],l=f>>24&255,x=f>>16&255,a=f>>8&255,s=f&255,c=G(s,a,x,l),g=c in n?n[c]:n[c]=N();g.rc+=s,g.gc+=a,g.bc+=x,g.ac+=l,g.cnt++}else if(e==="rgb444")for(let o=0;o<r;++o){let f=t[o],l=f>>16&255,x=f>>8&255,a=f&255,s=R(a,x,l),c=s in n?n[s]:n[s]=N();c.rc+=a,c.gc+=x,c.bc+=l,c.cnt++}else for(let o=0;o<r;++o){let f=t[o],l=f>>16&255,x=f>>8&255,a=f&255,s=D(a,x,l),c=s in n?n[s]:n[s]=N();c.rc+=a,c.gc+=x,c.bc+=l,c.cnt++}return n}function j(t,e,i={}){let{format:n="rgb565",clearAlpha:r=!0,clearAlphaColor:o=0,clearAlphaThreshold:f=0,oneBitAlpha:l=!1}=i;if(!t||!t.buffer)throw new Error("quantize() expected RGBA Uint8Array data");if(!(t instanceof Uint8Array)&&!(t instanceof Uint8ClampedArray))throw new Error("quantize() expected RGBA Uint8Array data");let x=new Uint32Array(t.buffer),a=i.useSqrt!==!1,s=n==="rgba4444",c=wt(x,n),g=c.length,p=g-1,b=new Uint32Array(g+1);for(var d=0,u=0;u<g;++u){let C=c[u];if(C!=null){var _=1/C.cnt;s&&(C.ac*=_),C.rc*=_,C.gc*=_,C.bc*=_,c[d++]=C}}q(e)/d<.022&&(a=!1);for(var u=0;u<d-1;++u)c[u].fw=u+1,c[u+1].bk=u,a&&(c[u].cnt=Math.sqrt(c[u].cnt));a&&(c[u].cnt=Math.sqrt(c[u].cnt));var v,B,h;for(u=0;u<d;++u){et(c,u,!1);var A=c[u].err;for(B=++b[0];B>1&&(h=B>>1,!(c[v=b[h]].err<=A));B=h)b[B]=v;b[B]=u}var F=d-e;for(u=0;u<F;){for(var w;;){var I=b[1];if(w=c[I],w.tm>=w.mtm&&c[w.nn].mtm<=w.tm)break;w.mtm==p?I=b[1]=b[b[0]--]:(et(c,I,!1),w.tm=u);var A=c[I].err;for(B=1;(h=B+B)<=b[0]&&(h<b[0]&&c[b[h]].err>c[b[h+1]].err&&h++,!(A<=c[v=b[h]].err));B=h)b[B]=v;b[B]=I}var y=c[w.nn],k=w.cnt,m=y.cnt,_=1/(k+m);s&&(w.ac=_*(k*w.ac+m*y.ac)),w.rc=_*(k*w.rc+m*y.rc),w.gc=_*(k*w.gc+m*y.gc),w.bc=_*(k*w.bc+m*y.bc),w.cnt+=y.cnt,w.mtm=++u,c[y.bk].fw=y.fw,c[y.fw].bk=y.bk,y.mtm=p}let M=[];var L=0;for(u=0;;++L){let Y=P(Math.round(c[u].rc),0,255),C=P(Math.round(c[u].gc),0,255),O=P(Math.round(c[u].bc),0,255),T=255;s&&(T=P(Math.round(c[u].ac),0,255),l&&(T=T<=(typeof l=="number"?l:127)?0:255),r&&T<=f&&(Y=C=O=o,T=0));let X=s?[Y,C,O,T]:[Y,C,O];if(pt(M,X)||M.push(X),(u=c[u].fw)==0)break}return M}function pt(t,e){for(let i=0;i<t.length;i++){let n=t[i],r=n[0]===e[0]&&n[1]===e[1]&&n[2]===e[2],o=n.length>=4&&e.length>=4?n[3]===e[3]:!0;if(r&&o)return!0}return!1}function E(t,e){var i=0,n;for(n=0;n<t.length;n++){let r=t[n]-e[n];i+=r*r}return i}function V(t,e){return e>1?Math.round(t/e)*e:t}function nt(t,{roundRGB:e=5,roundAlpha:i=10,oneBitAlpha:n=null}={}){let r=new Uint32Array(t.buffer);for(let o=0;o<r.length;o++){let f=r[o],l=f>>24&255,x=f>>16&255,a=f>>8&255,s=f&255;l=V(l,i),n&&(l=l<=(typeof n=="number"?n:127)?0:255),s=V(s,e),a=V(a,e),x=V(x,e),r[o]=l<<24|x<<16|a<<8|s<<0}}function rt(t,e,i="rgb565"){if(!t||!t.buffer)throw new Error("quantize() expected RGBA Uint8Array data");if(!(t instanceof Uint8Array)&&!(t instanceof Uint8ClampedArray))throw new Error("quantize() expected RGBA Uint8Array data");if(e.length>256)throw new Error("applyPalette() only works with 256 colors or less");let n=new Uint32Array(t.buffer),r=n.length,o=i==="rgb444"?4096:65536,f=new Uint8Array(r),l=new Array(o),x=i==="rgba4444";if(i==="rgba4444")for(let a=0;a<r;a++){let s=n[a],c=s>>24&255,g=s>>16&255,p=s>>8&255,b=s&255,d=G(b,p,g,c),_=d in l?l[d]:l[d]=yt(b,p,g,c,e);f[a]=_}else{let a=i==="rgb444"?R:D;for(let s=0;s<r;s++){let c=n[s],g=c>>16&255,p=c>>8&255,b=c&255,d=a(b,p,g),_=d in l?l[d]:l[d]=Bt(b,p,g,e);f[s]=_}}return f}function yt(t,e,i,n,r){let o=0,f=1e100;for(let l=0;l<r.length;l++){let x=r[l],a=x[3],s=z(a-n);if(s>f)continue;let c=x[0];if(s+=z(c-t),s>f)continue;let g=x[1];if(s+=z(g-e),s>f)continue;let p=x[2];s+=z(p-i),!(s>f)&&(f=s,o=l)}return o}function Bt(t,e,i,n){let r=0,o=1e100;for(let f=0;f<n.length;f++){let l=n[f],x=l[0],a=z(x-t);if(a>o)continue;let s=l[1];if(a+=z(s-e),a>o)continue;let c=l[2];a+=z(c-i),!(a>o)&&(o=a,r=f)}return r}function ot(t,e,i=5){if(!t.length||!e.length)return;let n=t.map(f=>f.slice(0,3)),r=i*i,o=t[0].length;for(let f=0;f<e.length;f++){let l=e[f];l.length<o?l=[l[0],l[1],l[2],255]:l.length>o?l=l.slice(0,3):l=l.slice();let x=Z(n,l.slice(0,3),E),a=x[0],s=x[1];s>0&&s<=r&&(t[a]=l)}}function z(t){return t*t}function W(t,e,i=E){let n=1/0,r=-1;for(let o=0;o<t.length;o++){let f=t[o],l=i(e,f);l<n&&(n=l,r=o)}return r}function Z(t,e,i=E){let n=1/0,r=-1;for(let o=0;o<t.length;o++){let f=t[o],l=i(e,f);l<n&&(n=l,r=o)}return[r,n]}function it(t,e,i=E){return t[W(t,e,i)]}function ct(t={}){let{initialCapacity:e=4096,auto:i=!0}=t,n=U(e),r=5003,o=new Uint8Array(256),f=new Int32Array(r),l=new Int32Array(r),x=!1;return{reset(){n.reset(),x=!1},finish(){n.writeByte(J.trailer)},bytes(){return n.bytes()},bytesView(){return n.bytesView()},get buffer(){return n.buffer},get stream(){return n},writeHeader:a,writeFrame(s,c,g,p={}){let{transparent:b=!1,transparentIndex:d=0,delay:_=0,palette:u=null,repeat:v=0,colorDepth:B=8,dispose:h=-1}=p,A=!1;if(i?x||(A=!0,a(),x=!0):A=!!p.first,c=Math.max(0,Math.floor(c)),g=Math.max(0,Math.floor(g)),A){if(!u)throw new Error("First frame must include a { palette } option");At(n,c,g,u,B),ft(n,u),v>=0&&Mt(n,v)}let F=Math.round(_/10);_t(n,h,F,b,d);let w=!!u&&!A;It(n,c,g,w?u:null),w&&ft(n,u),Ct(n,s,c,g,B,o,f,l)}};function a(){lt(n,"GIF89a")}}function _t(t,e,i,n,r){t.writeByte(33),t.writeByte(249),t.writeByte(4),r<0&&(r=0,n=!1);var o,f;n?(o=1,f=2):(o=0,f=0),e>=0&&(f=e&7),f<<=2,t.writeByte(0|f|0|o),S(t,i),t.writeByte(r||0),t.writeByte(0)}function At(t,e,i,n,r=8){let l=K(n.length)-1,x=128|r-1<<4|0|l,a=0,s=0;S(t,e),S(t,i),t.writeBytes([x,a,s])}function Mt(t,e){t.writeByte(33),t.writeByte(255),t.writeByte(11),lt(t,"NETSCAPE2.0"),t.writeByte(3),t.writeByte(1),S(t,e),t.writeByte(0)}function ft(t,e){let i=1<<K(e.length);for(let n=0;n<i;n++){let r=[0,0,0];n<e.length&&(r=e[n]),t.writeByte(r[0]),t.writeByte(r[1]),t.writeByte(r[2])}}function It(t,e,i,n){if(t.writeByte(44),S(t,0),S(t,0),S(t,e),S(t,i),n){let f=K(n.length)-1;t.writeByte(128|f)}else t.writeByte(0)}function Ct(t,e,i,n,r=8,o,f,l){tt(i,n,e,r,t,o,f,l)}function S(t,e){t.writeByte(e&255),t.writeByte(e>>8&255)}function lt(t,e){for(var i=0;i<e.length;i++)t.writeByte(e.charCodeAt(i))}function K(t){return Math.max(Math.ceil(Math.log2(t)),1)}var vt=ct;return bt(kt);})();
-
+/* eslint-enable */
 
 /*
  * Vencord - Expression Picker Enhanced
  *
  * Adds a top-left resize handle to Discord's expression picker
- * (GIF / stickers / emoji) and remembers its height.
+ * (GIF / stickers / emoji), remembers its height, imports local GIFs and
+ * keeps the last opened category.
  *
  * Width is persisted by Discord itself (expressionPickerWidth).
  * Height is stored in %LOCALAPPDATA%\VencordPickerResize\size.json.
@@ -16,17 +19,37 @@ var Gifenc=(()=>{var Q=Object.defineProperty;var st=Object.getOwnPropertyDescrip
  * Loaded in the renderer main world by a small loader appended to
  * Vencord's preload.js. The loader also exposes VencordPickerResize
  * so the saved height is known before the picker is created (no flash).
+ *
+ * Architecture note: this is intentionally a single injected file because
+ * the preload loader executes one script in the page world. Everything lives
+ * in one IIFE so the resize and import features can share:
+ *   - one host/install guard and one test hook;
+ *   - DOM selectors, style injection and activation helpers;
+ *   - localization, clamping and logging utilities;
+ *   - a single maintenance timer instead of one timer per feature.
+ * The bundled `gifenc` block at the top is vendored and minified; do not
+ * reformat or edit it directly.
  */
 (() => {
     "use strict";
 
     // Allow an empty hostname (preload can run before navigation) but
     // don't run in the Monaco editor window or other remote pages.
-    if (location.hostname && !/(^|\.)discord\.com$/i.test(location.hostname)) return;
+    const isDiscordHost = !location.hostname || /(^|\.)discord\.com$/i.test(location.hostname);
+    if (!isDiscordHost) return;
 
+    // Both features used to be separate IIFEs. They now live in a single
+    // bootstrap so they can share utilities, constants and a single timer.
     const INSTALL_FLAG = "__vcExpressionPickerResizeInstalled";
     if (window[INSTALL_FLAG]) return;
     window[INSTALL_FLAG] = true;
+    // Kept for compatibility with the previous split-module version and its
+    // diagnostics/tests; the single bootstrap guard is INSTALL_FLAG above.
+    window.__vcPickerImportInstalled = true;
+
+    // The Node test suite sets this object to load the helpers without
+    // starting any observer, timer or DOM mutation.
+    const TEST_HOOK = window.__VC_PICKER_RESIZE_TEST__ ?? null;
 
     const MIN_WIDTH = 498;
     const MIN_HEIGHT = 320;
@@ -35,10 +58,125 @@ var Gifenc=(()=>{var Q=Object.defineProperty;var st=Object.getOwnPropertyDescrip
     const HANDLE_CLASS = "vc-picker-resize";
     const STYLE_ID = "vc-picker-resize-style";
     const VARS_STYLE_ID = "vc-picker-resize-vars";
+    const IMPORT_STYLE_ID = "vc-picker-import-style";
     const HEIGHT_VAR = "--vc-picker-saved-height";
+    const SETTINGS_KEY = "vcExpressionPickerSize";
+
+    /** All UI/delivery timings in one place, in milliseconds. */
+    const TIMINGS = Object.freeze({
+        maintain: 250,
+        styleRetry: 250,
+        gifReveal: 10000,
+        layerLookup: 2000,
+        status: 3500,
+        favoriteRefresh: 350,
+        importError: 1300,
+        restoreWindow: 5000,
+        videoMetadata: 15000,
+        videoSeek: 7000,
+        composerFocusRetry: 50,
+        startRetry: 50
+    });
+
+    const ATTEMPTS = Object.freeze({
+        styleRetry: 20,
+        composerFocus: 12,
+        startRetry: 100
+    });
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const round = value => Math.round(value);
+    const round = (value) => Math.round(value);
+
+    const LOG_PREFIX = "[ExpressionPickerEnhanced]";
+
+    /** Selectors for Discord internals. Keep every hashed class in one place. */
+    const SELECTORS = Object.freeze({
+        pickerLayer: '[class*="expressionPickerPositionLayer"]',
+        drawer: '[class*="drawerSizingWrapper"]',
+        gifPanelId: "gif-picker-tab-panel",
+        nativeBackButton: ".backButton_fed6d3",
+        favoritesHeader: '[class*="favoritesHeader"]',
+        rootCards: '.content_fed6d3 .result__2dc39[role="button"]',
+        rootCardClass: "result__2dc39",
+        categoryLabel: '[class*="categoryText"], [class*="categoryName"]',
+        searchInput: 'input[role="searchbox"]',
+        clearButton: '[class*="clearButton"]',
+        slateEditor: '[data-slate-editor="true"]'
+    });
+    const DRAWER_SELECTOR = `${SELECTORS.pickerLayer} ${SELECTORS.drawer}`;
+
+    const ROOT_VIEWS = new Set(["root", "favorites", "imports"]);
+
+    function getVencord() {
+        try {
+            return window.Vencord ?? null;
+        } catch {
+            return null;
+        }
+    }
+
+    function getWebpack() {
+        return getVencord()?.Webpack ?? null;
+    }
+
+    function getWebpackCommon() {
+        return getWebpack()?.Common ?? null;
+    }
+
+    /**
+     * Resolves a Discord module defensively. Discord's internals change
+     * between releases, so every call site must tolerate a missing module.
+     */
+    function findByProps(...properties) {
+        try {
+            return getWebpack()?.findByProps?.(...properties) ?? null;
+        } catch {
+            return null;
+        }
+    }
+
+    /** Returns a normalized pathname for a Discord media URL, or null. */
+    function toPathname(src) {
+        try {
+            return new URL(src, location.href).pathname.toLowerCase();
+        } catch {
+            return null;
+        }
+    }
+
+    function hasFavoritesView(root) {
+        return !!root?.querySelector?.(SELECTORS.favoritesHeader);
+    }
+
+    function injectStyle(id, css) {
+        let style = document.getElementById(id);
+        if (!style) {
+            style = document.createElement("style");
+            style.id = id;
+            (document.head || document.documentElement).appendChild(style);
+        }
+        if (style.textContent !== css) style.textContent = css;
+        return style;
+    }
+
+    /** Keyboard support for non-button elements with role="button". */
+    function addActivationHandler(element, handler) {
+        element.addEventListener("click", handler);
+        element.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") handler(event);
+        });
+    }
+
+    function createIconAction({ className, label, icon, onActivate }) {
+        const element = document.createElement("div");
+        element.className = className;
+        element.setAttribute("role", "button");
+        element.setAttribute("tabindex", "0");
+        element.setAttribute("aria-label", label);
+        element.innerHTML = icon;
+        addActivationHandler(element, onActivate);
+        return element;
+    }
 
     const STATIC_CSS = `
 /* --- Large expression picker ------------------------------------------- */
@@ -54,8 +192,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     margin-inline-end: 0 !important;
 
     height: var(${HEIGHT_VAR}, min(80vh, 920px));
-    min-height: 320px;
-    max-height: calc(100vh - 120px);
+    min-height: ${MIN_HEIGHT}px;
+    max-height: calc(100vh - ${TOP_MARGIN * 2}px);
 }
 
 /* --- Discord's native left-edge width handle: hidden ------------------- */
@@ -107,10 +245,16 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 }
 
 .${HANDLE_CLASS}:hover,
-.${HANDLE_CLASS}.active {
+.${HANDLE_CLASS}.active,
+.${HANDLE_CLASS}:focus-visible {
     opacity: 1;
     background: var(--background-mod-subtle);
     color: var(--interactive-text-hover);
+}
+
+.${HANDLE_CLASS}:focus-visible {
+    outline: 2px solid var(--focus-primary, var(--brand-500));
+    outline-offset: 2px;
 }
 
 .${HANDLE_CLASS} svg {
@@ -130,24 +274,31 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
     function getSettings() {
         try {
-            return window.Vencord?.Settings ?? null;
+            return getVencord()?.Settings ?? null;
         } catch {
             return null;
         }
     }
 
+    /** Returns the persisted height, clamped, or null when none exists. */
     function loadSavedHeight() {
-        const api = getApi();
-        if (api && Number.isFinite(api.savedHeight)) {
-            return clamp(api.savedHeight, MIN_HEIGHT, MAX_HEIGHT);
-        }
+        try {
+            const api = getApi();
+            if (api && Number.isFinite(api.savedHeight)) {
+                return clamp(api.savedHeight, MIN_HEIGHT, MAX_HEIGHT);
+            }
 
-        const value = getSettings()?.["vcExpressionPickerSize"];
-        const height = Number(value?.height);
-        return Number.isFinite(height) ? clamp(height, MIN_HEIGHT, MAX_HEIGHT) : null;
+            const value = getSettings()?.[SETTINGS_KEY];
+            const height = Number(value?.height);
+            return Number.isFinite(height) ? clamp(height, MIN_HEIGHT, MAX_HEIGHT) : null;
+        } catch {
+            return null;
+        }
     }
 
+    /** Persists the height through the preload bridge and Vencord settings. */
     function saveHeight(height) {
+        if (!Number.isFinite(height)) return;
         const value = round(clamp(height, MIN_HEIGHT, MAX_HEIGHT));
 
         const api = getApi();
@@ -155,7 +306,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             try {
                 api.saveHeight(value);
             } catch (error) {
-                console.error("[PickerResize] Failed to save height", error);
+                console.error(`${LOG_PREFIX} Failed to save height`, error);
             }
         }
 
@@ -163,32 +314,33 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         try {
             const settings = getSettings();
             if (settings) {
-                settings["vcExpressionPickerSize"] = {
-                    ...(settings["vcExpressionPickerSize"] ?? {}),
+                settings[SETTINGS_KEY] = {
+                    ...(settings[SETTINGS_KEY] ?? {}),
                     height: value
                 };
             }
-        } catch { /* ignore */ }
+        } catch {
+            /* Vencord settings may be read-only or unavailable. */
+        }
     }
 
+    let cachedSettingsSetter = null;
+
     function setDiscordWidth(width) {
+        if (!Number.isFinite(width)) return;
         try {
-            const setter = window.Vencord?.Webpack?.findByProps?.("updatedUnsyncedSettings");
-            setter?.updatedUnsyncedSettings({ expressionPickerWidth: round(width) });
+            if (!cachedSettingsSetter) {
+                cachedSettingsSetter = findByProps("updatedUnsyncedSettings");
+            }
+            cachedSettingsSetter?.updatedUnsyncedSettings({ expressionPickerWidth: round(width) });
         } catch {
-            // Discord internals changed - width will fall back to its own value.
+            // Discord internals changed - retry discovery on the next resize.
+            cachedSettingsSetter = null;
         }
     }
 
     function ensureStyleTag() {
-        let style = document.getElementById(STYLE_ID);
-        if (!style) {
-            style = document.createElement("style");
-            style.id = STYLE_ID;
-            style.textContent = STATIC_CSS;
-            (document.head || document.documentElement).appendChild(style);
-        }
-        return style;
+        return injectStyle(STYLE_ID, STATIC_CSS);
     }
 
     function applySavedHeight(height) {
@@ -198,16 +350,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         // Use a stylesheet rule instead of an inline style on <html>: Discord
         // rewrites the <html> style attribute during startup, which would
         // otherwise wipe the variable and bring the resize flash back.
-        let vars = document.getElementById(VARS_STYLE_ID);
-        if (!vars) {
-            vars = document.createElement("style");
-            vars.id = VARS_STYLE_ID;
-            (document.head || document.documentElement).appendChild(vars);
-        }
-
         // Set this before the picker exists so its very first paint already
         // uses the remembered height (no visible resize flash).
-        vars.textContent = `:root { ${HEIGHT_VAR}: ${round(height)}px; }`;
+        injectStyle(VARS_STYLE_ID, `:root { ${HEIGHT_VAR}: ${round(height)}px; }`);
     }
 
     let savedHeight = loadSavedHeight();
@@ -217,36 +362,38 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (savedHeight) applySavedHeight(savedHeight);
     }
 
-    if (document.documentElement) {
-        initStyle();
-    } else {
-        const observer = new MutationObserver(() => {
-            if (!document.documentElement) return;
-            observer.disconnect();
+    if (!TEST_HOOK) {
+        if (document.documentElement) {
             initStyle();
-        });
-        observer.observe(document, { childList: true, subtree: true });
+        } else {
+            const observer = new MutationObserver(() => {
+                if (!document.documentElement) return;
+                observer.disconnect();
+                initStyle();
+            });
+            observer.observe(document, { childList: true, subtree: true });
+        }
+
+        // Vencord may not be initialised yet when this script starts; retry briefly.
+        let attempts = 0;
+        const styleRetry = setInterval(() => {
+            if (savedHeight) {
+                initStyle();
+                clearInterval(styleRetry);
+                return;
+            }
+
+            const height = loadSavedHeight();
+            if (height) {
+                savedHeight = height;
+                initStyle();
+                clearInterval(styleRetry);
+                return;
+            }
+
+            if (++attempts > ATTEMPTS.styleRetry) clearInterval(styleRetry);
+        }, TIMINGS.styleRetry);
     }
-
-    // Vencord may not be initialised yet when this script starts; retry briefly.
-    let attempts = 0;
-    const styleRetry = setInterval(() => {
-        if (savedHeight) {
-            initStyle();
-            clearInterval(styleRetry);
-            return;
-        }
-
-        const height = loadSavedHeight();
-        if (height) {
-            savedHeight = height;
-            initStyle();
-            clearInterval(styleRetry);
-            return;
-        }
-
-        if (++attempts > 20) clearInterval(styleRetry);
-    }, 250);
 
     let gifPanelObserver = null;
     let gifPanelEl = null;
@@ -255,8 +402,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!media || media.__vcGifMarked) return;
         media.__vcGifMarked = true;
 
+        let revealTimer = 0;
         const reveal = () => {
             if (media.__vcGifReady) return;
+            clearTimeout(revealTimer);
             media.__vcGifReady = true;
             media.classList.add("vc-gif-ready");
         };
@@ -278,7 +427,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
 
         // Never leave a tile invisible forever if the media never loads.
-        setTimeout(reveal, 10000);
+        if (!media.__vcGifReady) {
+            revealTimer = setTimeout(reveal, TIMINGS.gifReveal);
+        }
     }
 
     function markGifMediaIn(root) {
@@ -294,13 +445,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             gifPanelEl = null;
         }
 
-        const panel = document.getElementById("gif-picker-tab-panel");
+        const panel = findPanel();
         if (!panel || panel === gifPanelEl) return;
 
         gifPanelObserver?.disconnect();
         gifPanelEl = panel;
 
-        gifPanelObserver = new MutationObserver(mutations => {
+        gifPanelObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 for (const node of mutation.addedNodes) {
                     markGifMediaIn(node);
@@ -314,9 +465,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function createHandle() {
         const handle = document.createElement("div");
         handle.className = HANDLE_CLASS;
-        handle.title = "Redimensionner";
+        handle.title = t("resizeHandle");
         handle.setAttribute("role", "button");
-        handle.setAttribute("aria-label", "Redimensionner la fenêtre");
+        handle.setAttribute("tabindex", "0");
+        handle.setAttribute("aria-label", t("resizeHandleLabel"));
         handle.innerHTML = `
             <svg viewBox="0 0 20 20" width="13" height="13" aria-hidden="true">
                 <path d="M3.25 3.25 16.75 16.75M3.25 9.25v-6h6M16.75 10.75v6h-6"
@@ -325,7 +477,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             </svg>`;
 
         // Keep Discord's "click outside to close" handler from firing.
-        handle.addEventListener("mousedown", event => {
+        handle.addEventListener("mousedown", (event) => {
             event.preventDefault();
             event.stopPropagation();
         });
@@ -333,6 +485,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return handle;
     }
 
+    /** Adds the resize grip to a picker drawer once and restores its height. */
     function initDrawer(drawer) {
         if (!drawer || drawer.__vcPickerResize) return;
         drawer.__vcPickerResize = true;
@@ -351,13 +504,36 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         let drag = null;
 
-        handle.addEventListener("pointerdown", event => {
+        const getSizeBounds = () => {
+            const rect = drawer.getBoundingClientRect();
+            const parentRect = drawer.parentElement?.getBoundingClientRect() ?? rect;
+            return {
+                rect,
+                maxWidth: Math.max(MIN_WIDTH, parentRect.width),
+                maxHeight: Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, rect.bottom - TOP_MARGIN))
+            };
+        };
+
+        const applyDrawerSize = (width, height) => {
+            drawer.style.width = `${round(width)}px`;
+            drawer.style.height = `${round(height)}px`;
+        };
+
+        const persistSize = (width, height) => {
+            savedHeight = round(height);
+            // Update the CSS variable so the next opening has the right size
+            // from its first paint.
+            applySavedHeight(savedHeight);
+            saveHeight(savedHeight);
+            setDiscordWidth(width);
+        };
+
+        handle.addEventListener("pointerdown", (event) => {
             if (event.button !== 0) return;
             event.preventDefault();
             event.stopPropagation();
 
-            const rect = drawer.getBoundingClientRect();
-            const parentRect = drawer.parentElement.getBoundingClientRect();
+            const { rect, maxWidth, maxHeight } = getSizeBounds();
 
             drag = {
                 pointerId: event.pointerId,
@@ -365,17 +541,19 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 startY: event.clientY,
                 startWidth: rect.width,
                 startHeight: rect.height,
-                maxWidth: parentRect.width,
-                maxHeight: Math.max(MIN_HEIGHT, rect.bottom - TOP_MARGIN)
+                maxWidth,
+                maxHeight
             };
 
             handle.classList.add("active");
             try {
                 handle.setPointerCapture(event.pointerId);
-            } catch { /* ignore */ }
+            } catch {
+                /* ignore */
+            }
         });
 
-        handle.addEventListener("pointermove", event => {
+        handle.addEventListener("pointermove", (event) => {
             if (!drag || event.pointerId !== drag.pointerId) return;
             event.preventDefault();
 
@@ -383,60 +561,74 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const width = clamp(drag.startWidth + (drag.startX - event.clientX), MIN_WIDTH, drag.maxWidth);
             const height = clamp(drag.startHeight + (drag.startY - event.clientY), MIN_HEIGHT, drag.maxHeight);
 
-            drawer.style.width = `${round(width)}px`;
-            drawer.style.height = `${round(height)}px`;
+            applyDrawerSize(width, height);
         });
 
-        const finishDrag = event => {
+        const finishDrag = (event) => {
             if (!drag || event.pointerId !== drag.pointerId) return;
 
             drag = null;
             handle.classList.remove("active");
             try {
                 handle.releasePointerCapture(event.pointerId);
-            } catch { /* ignore */ }
+            } catch {
+                /* ignore */
+            }
 
             const rect = drawer.getBoundingClientRect();
-            savedHeight = rect.height;
-
-            // Update the CSS variable so the next opening has the right size
-            // from its first paint.
-            applySavedHeight(rect.height);
-            saveHeight(rect.height);
-            setDiscordWidth(rect.width);
+            persistSize(rect.width, rect.height);
         };
 
         handle.addEventListener("pointerup", finishDrag);
         handle.addEventListener("pointercancel", finishDrag);
+
+        // Arrow keys provide the same resize affordance without a pointer.
+        handle.addEventListener("keydown", (event) => {
+            const step = event.shiftKey ? 32 : 8;
+            let deltaWidth = 0;
+            let deltaHeight = 0;
+            if (event.key === "ArrowLeft") deltaWidth = step;
+            else if (event.key === "ArrowRight") deltaWidth = -step;
+            else if (event.key === "ArrowUp") deltaHeight = step;
+            else if (event.key === "ArrowDown") deltaHeight = -step;
+            else return;
+
+            event.preventDefault();
+            const { rect, maxWidth, maxHeight } = getSizeBounds();
+            const width = clamp(rect.width + deltaWidth, MIN_WIDTH, maxWidth);
+            const height = clamp(rect.height + deltaHeight, MIN_HEIGHT, maxHeight);
+            applyDrawerSize(width, height);
+            persistSize(width, height);
+        });
     }
 
     function initFromLayer(layer) {
-        const drawer = layer.querySelector?.('[class*="drawerSizingWrapper"]');
+        const drawer = layer.querySelector?.(SELECTORS.drawer);
         if (drawer) {
             initDrawer(drawer);
             return;
         }
 
         const observer = new MutationObserver(() => {
-            const found = layer.querySelector?.('[class*="drawerSizingWrapper"]');
+            const found = layer.querySelector?.(SELECTORS.drawer);
             if (!found) return;
+            clearTimeout(timeout);
             observer.disconnect();
             initDrawer(found);
         });
+        const timeout = setTimeout(() => observer.disconnect(), TIMINGS.layerLookup);
         observer.observe(layer, { childList: true, subtree: true });
-        setTimeout(() => observer.disconnect(), 2000);
     }
 
     function startPickerObserver() {
         if (!document.body) return false;
 
-        const observer = new MutationObserver(mutations => {
+        const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 for (const node of mutation.addedNodes) {
                     if (node.nodeType !== 1) continue;
-                    if (node.matches?.('[class*="expressionPickerPositionLayer"]')) {
-                        initFromLayer(node);
-                    }
+                    if (node.matches?.(SELECTORS.pickerLayer)) initFromLayer(node);
+                    node.querySelectorAll?.(SELECTORS.pickerLayer).forEach(initFromLayer);
                 }
             }
         });
@@ -444,30 +636,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return true;
     }
 
-    function tick() {
-        const drawer = document.querySelector('[class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"]');
-        if (drawer) initDrawer(drawer);
-        setupGifObserver();
-    }
-
-    if (!startPickerObserver()) {
-        document.addEventListener("DOMContentLoaded", startPickerObserver, { once: true });
-    }
-    tick();
-    setInterval(tick, 300);
-})();
-
-/*
- * Vencord Expression Picker Enhanced - local GIF imports
- * Adds an import button to the GIF page, converts files to GIF and
- * shows them in a dedicated "Importés" category of the GIF picker.
- */
-(() => {
-    "use strict";
-
-    if (location.hostname && !/(^|\.)discord\.com$/i.test(location.hostname)) return;
-    if (window.__vcPickerImportInstalled) return;
-    window.__vcPickerImportInstalled = true;
+    /*
+     * Local GIF imports
+     * Adds an import button to the GIF page, converts files to GIF and
+     * shows them in a dedicated "Imported" category of the GIF picker.
+     *
+     * This part intentionally shares the outer IIFE with the resize feature:
+     * the whole module is injected as one script, so a single scope avoids
+     * duplicated guards, helpers and polling timers.
+     */
 
     const DB_NAME = "VencordPickerResize";
     const DB_VERSION = 1;
@@ -480,17 +657,35 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     const FPS = 10;
     const MAX_VIDEO_FRAMES = 60;
     const MAX_IMAGE_FRAMES = 120;
+    const UPLOAD_PLATFORM_WEB = 1;
+    const DRAFT_TYPE_CHANNEL_MESSAGE = 0;
+    const GIF_EXTENSIONS = [".gif"];
+    const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".avif", ".apng", ".bmp"];
+    const VIDEO_EXTENSIONS = [".mp4", ".webm", ".mov", ".mkv", ".m4v"];
+    const IMAGE_MIME_TYPES = [
+        "image/gif",
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/avif",
+        "image/apng",
+        "image/bmp"
+    ];
+    const VIDEO_MIME_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-matroska"];
     const ACCEPT = [
-        ".gif", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".apng", ".bmp",
-        "image/gif", "image/png", "image/jpeg", "image/webp", "image/avif", "image/apng", "image/bmp",
-        ".mp4", ".webm", ".mov", ".mkv", ".m4v",
-        "video/mp4", "video/webm", "video/quicktime", "video/x-matroska"
+        ...GIF_EXTENSIONS,
+        ...IMAGE_EXTENSIONS,
+        ...IMAGE_MIME_TYPES,
+        ...VIDEO_EXTENSIONS,
+        ...VIDEO_MIME_TYPES
     ].join(",");
 
     const MESSAGES = {
         en: {
             categoryName: "Imported",
             importButton: "Import GIFs",
+            resizeHandle: "Resize picker",
+            resizeHandleLabel: "Resize the expression picker",
             importTile: "Import",
             searchPlaceholder: "Search imported",
             back: "Back",
@@ -531,6 +726,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         fr: {
             categoryName: "Importés",
             importButton: "Importer des GIF",
+            resizeHandle: "Redimensionner",
+            resizeHandleLabel: "Redimensionner la fenêtre",
             importTile: "Importer",
             searchPlaceholder: "Rechercher dans les importés",
             back: "Retour",
@@ -571,6 +768,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         es: {
             categoryName: "Importados",
             importButton: "Importar GIF",
+            resizeHandle: "Cambiar tamaño",
+            resizeHandleLabel: "Cambiar el tamaño del selector",
             importTile: "Importar",
             searchPlaceholder: "Buscar en los importados",
             back: "Atrás",
@@ -611,6 +810,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         de: {
             categoryName: "Importiert",
             importButton: "GIFs importieren",
+            resizeHandle: "Größe ändern",
+            resizeHandleLabel: "Größe des Auswahlfensters ändern",
             importTile: "Importieren",
             searchPlaceholder: "Importierte durchsuchen",
             back: "Zurück",
@@ -651,6 +852,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         it: {
             categoryName: "Importati",
             importButton: "Importa GIF",
+            resizeHandle: "Ridimensiona",
+            resizeHandleLabel: "Ridimensiona la finestra",
             importTile: "Importa",
             searchPlaceholder: "Cerca negli importati",
             back: "Indietro",
@@ -691,6 +894,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         pt: {
             categoryName: "Importados",
             importButton: "Importar GIFs",
+            resizeHandle: "Redimensionar",
+            resizeHandleLabel: "Redimensionar a janela",
             importTile: "Importar",
             searchPlaceholder: "Pesquisar nos importados",
             back: "Voltar",
@@ -731,6 +936,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         nl: {
             categoryName: "Geïmporteerd",
             importButton: "GIF's importeren",
+            resizeHandle: "Formaat wijzigen",
+            resizeHandleLabel: "Formaat van het venster wijzigen",
             importTile: "Importeren",
             searchPlaceholder: "Geïmporteerde GIF's zoeken",
             back: "Terug",
@@ -771,6 +978,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         pl: {
             categoryName: "Zaimportowane",
             importButton: "Importuj GIF-y",
+            resizeHandle: "Zmień rozmiar",
+            resizeHandleLabel: "Zmień rozmiar okna",
             importTile: "Importuj",
             searchPlaceholder: "Szukaj w zaimportowanych",
             back: "Wstecz",
@@ -781,11 +990,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             addFavorite: "Dodaj do ulubionych",
             removeFavorite: "Usuń z ulubionych",
             countGifs: { one: "{count} GIF", few: "{count} GIF-y", many: "{count} GIF-ów", other: "{count} GIF-a" },
-            countResults: { one: "{count} wynik", few: "{count} wyniki", many: "{count} wyników", other: "{count} wyniku" },
+            countResults: {
+                one: "{count} wynik",
+                few: "{count} wyniki",
+                many: "{count} wyników",
+                other: "{count} wyniku"
+            },
             emptyImports: "Nie ma jeszcze zaimportowanych GIF-ów",
             noResults: "Brak wyników dla „{query}”",
             converting: "Konwersja {current}/{total}: {name}",
-            importedCount: { one: "Zaimportowano {count} GIF", few: "Zaimportowano {count} GIF-y", many: "Zaimportowano {count} GIF-ów", other: "Zaimportowano {count} GIF-a" },
+            importedCount: {
+                one: "Zaimportowano {count} GIF",
+                few: "Zaimportowano {count} GIF-y",
+                many: "Zaimportowano {count} GIF-ów",
+                other: "Zaimportowano {count} GIF-a"
+            },
             noneImported: "Nie zaimportowano żadnego GIF-a",
             attachFailed: "Nie udało się dołączyć GIF-a",
             attached: "GIF dołączony do wiadomości",
@@ -811,6 +1030,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         ru: {
             categoryName: "Импортированные",
             importButton: "Импортировать GIF",
+            resizeHandle: "Изменить размер",
+            resizeHandleLabel: "Изменить размер окна",
             importTile: "Импортировать",
             searchPlaceholder: "Поиск среди импортированных",
             back: "Назад",
@@ -821,11 +1042,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             addFavorite: "Добавить в избранное",
             removeFavorite: "Удалить из избранного",
             countGifs: { one: "{count} GIF", few: "{count} GIF", many: "{count} GIF", other: "{count} GIF" },
-            countResults: { one: "{count} результат", few: "{count} результата", many: "{count} результатов", other: "{count} результата" },
+            countResults: {
+                one: "{count} результат",
+                few: "{count} результата",
+                many: "{count} результатов",
+                other: "{count} результата"
+            },
             emptyImports: "Импортированных GIF пока нет",
             noResults: "Нет результатов по запросу «{query}»",
             converting: "Преобразование {current}/{total}: {name}",
-            importedCount: { one: "Импортирован {count} GIF", few: "Импортировано {count} GIF", many: "Импортировано {count} GIF", other: "Импортировано {count} GIF" },
+            importedCount: {
+                one: "Импортирован {count} GIF",
+                few: "Импортировано {count} GIF",
+                many: "Импортировано {count} GIF",
+                other: "Импортировано {count} GIF"
+            },
             noneImported: "GIF не импортирован",
             attachFailed: "Не удалось прикрепить GIF",
             attached: "GIF прикреплён к сообщению",
@@ -851,6 +1082,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         ja: {
             categoryName: "インポート済み",
             importButton: "GIFをインポート",
+            resizeHandle: "サイズ変更",
+            resizeHandleLabel: "ウィンドウのサイズを変更",
             importTile: "インポート",
             searchPlaceholder: "インポート済みを検索",
             back: "戻る",
@@ -891,6 +1124,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         ko: {
             categoryName: "가져온 GIF",
             importButton: "GIF 가져오기",
+            resizeHandle: "크기 조정",
+            resizeHandleLabel: "창 크기 조정",
             importTile: "가져오기",
             searchPlaceholder: "가져온 GIF 검색",
             back: "뒤로",
@@ -931,6 +1166,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         "zh-CN": {
             categoryName: "已导入",
             importButton: "导入 GIF",
+            resizeHandle: "调整大小",
+            resizeHandleLabel: "调整窗口大小",
             importTile: "导入",
             searchPlaceholder: "搜索已导入的 GIF",
             back: "返回",
@@ -971,6 +1208,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         "zh-TW": {
             categoryName: "已匯入",
             importButton: "匯入 GIF",
+            resizeHandle: "調整大小",
+            resizeHandleLabel: "調整視窗大小",
             importTile: "匯入",
             searchPlaceholder: "搜尋已匯入的 GIF",
             back: "返回",
@@ -1011,6 +1250,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         tr: {
             categoryName: "İçe Aktarılanlar",
             importButton: "GIF içe aktar",
+            resizeHandle: "Yeniden boyutlandır",
+            resizeHandleLabel: "Pencere boyutunu değiştir",
             importTile: "İçe aktar",
             searchPlaceholder: "İçe aktarılanlarda ara",
             back: "Geri",
@@ -1050,14 +1291,18 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
     };
 
+    const MESSAGE_KEYS_BY_LOWER = new Map(Object.keys(MESSAGES).map((key) => [key.toLowerCase(), key]));
+    const PLURAL_RULES = new Map();
+    const PLACEHOLDER_PATTERN = /\{(\w+)\}/g;
     let currentLocale = null;
 
     function detectDiscordLocale() {
         try {
-            const common = window.Vencord?.Webpack?.Common;
-            const locale = common?.UserSettingsProtoStore?.settings?.localization?.locale?.value
-                ?? window.Vencord?.Webpack?.findByProps?.("getLocale")?.getLocale?.()
-                ?? common?.i18n?.intl?.currentLocale;
+            const common = getWebpackCommon();
+            const locale =
+                common?.UserSettingsProtoStore?.settings?.localization?.locale?.value ??
+                findByProps("getLocale")?.getLocale?.() ??
+                common?.i18n?.intl?.currentLocale;
             return locale ? String(locale) : null;
         } catch {
             return null;
@@ -1065,15 +1310,16 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     }
 
     function normalizeLocale(locale) {
-        const value = String(locale || "").replace("_", "-").toLowerCase();
+        const value = String(locale || "")
+            .replace("_", "-")
+            .toLowerCase();
         if (!value) return "en";
-        if (value === "zh-hans") return "zh-CN";
-        if (value === "zh-hant") return "zh-TW";
-        const exact = Object.keys(MESSAGES).find(key => key.toLowerCase() === value);
+        if (value === "zh" || value.startsWith("zh-hans")) return "zh-CN";
+        if (value.startsWith("zh-hant")) return "zh-TW";
+        const exact = MESSAGE_KEYS_BY_LOWER.get(value);
         if (exact) return exact;
         const base = value.split("-")[0];
-        const baseMatch = Object.keys(MESSAGES).find(key => key.toLowerCase() === base);
-        return baseMatch || "en";
+        return MESSAGE_KEYS_BY_LOWER.get(base) || "en";
     }
 
     function getLocale() {
@@ -1083,8 +1329,17 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return currentLocale || normalizeLocale(navigator.language || "en");
     }
 
-    function interpolate(template, params) {
-        return String(template).replace(/\{(\w+)\}/g, (match, name) =>
+    function getPluralRules(locale) {
+        let rules = PLURAL_RULES.get(locale);
+        if (!rules) {
+            rules = new Intl.PluralRules(locale);
+            PLURAL_RULES.set(locale, rules);
+        }
+        return rules;
+    }
+
+    function interpolate(template, params = {}) {
+        return String(template).replace(PLACEHOLDER_PATTERN, (match, name) =>
             params[name] == null ? "" : String(params[name])
         );
     }
@@ -1096,17 +1351,20 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         if (entry && typeof entry === "object") {
             const count = Number(params.count);
-            const category = new Intl.PluralRules(locale).select(Number.isFinite(count) ? count : 0);
+            const category = getPluralRules(locale).select(Number.isFinite(count) ? count : 0);
             entry = entry[category] ?? entry.other ?? entry.one ?? "";
         }
 
         return interpolate(entry, params);
     }
 
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const yieldUI = () => new Promise(resolve => setTimeout(resolve, 0));
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const yieldToUI = () => delay(0);
+    const hasExtension = (name, extensions) => extensions.some((extension) => name.endsWith(extension));
     const fit = (width, height) => {
-        if (!width || !height) return { width: 1, height: 1 };
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+            return { width: 1, height: 1 };
+        }
         const scale = Math.min(1, MAX_DIMENSION / Math.max(width, height));
         return {
             width: Math.max(1, Math.round(width * scale)),
@@ -1130,7 +1388,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let importedView = false;
     let importedQuery = "";
     let overlay = null;
-    let overlayKey = "";
+    let overlayKey = null;
     let overlayLayoutWidth = 0;
 
     const LAST_VIEW_COOKIE = "vcPickerLastView";
@@ -1197,6 +1455,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function openDB() {
         if (!dbPromise) {
             dbPromise = new Promise((resolve, reject) => {
+                if (typeof indexedDB === "undefined") {
+                    reject(new Error("IndexedDB is not available"));
+                    return;
+                }
+
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onupgradeneeded = () => {
                     const db = request.result;
@@ -1206,47 +1469,64 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 };
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
+                request.onblocked = () => reject(new Error("IndexedDB upgrade is blocked"));
+            }).catch((error) => {
+                // Allow a later call to retry after a transient failure.
+                dbPromise = null;
+                throw error;
             });
         }
         return dbPromise;
     }
 
-    async function getAllImports() {
-        const db = await openDB();
+    function requestAsPromise(request) {
         return new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE, "readonly");
-            const request = tx.objectStore(STORE).getAll();
-            request.onsuccess = () => resolve(request.result || []);
+            request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
     }
 
-    async function putImport(record) {
+    async function getAllImports() {
+        const db = await openDB();
+        const tx = db.transaction(STORE, "readonly");
+        return (await requestAsPromise(tx.objectStore(STORE).getAll())) || [];
+    }
+
+    async function runWriteTransaction(operation) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE, "readwrite");
-            tx.objectStore(STORE).put(record);
             tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
+            tx.onerror = () => reject(tx.error ?? new Error("IndexedDB transaction failed"));
+            tx.onabort = () => reject(tx.error ?? new Error("IndexedDB transaction aborted"));
+
+            try {
+                operation(tx.objectStore(STORE));
+            } catch (error) {
+                try {
+                    tx.abort();
+                } catch {
+                    /* The transaction may already be finished. */
+                }
+                reject(error);
+            }
         });
     }
 
-    async function removeImport(id) {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE, "readwrite");
-            tx.objectStore(STORE).delete(id);
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-        });
+    function putImport(record) {
+        return runWriteTransaction((store) => store.put(record));
+    }
+
+    function removeImport(id) {
+        return runWriteTransaction((store) => store.delete(id));
     }
 
     function findDrawer() {
-        return document.querySelector('[class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"]');
+        return document.querySelector(DRAWER_SELECTOR);
     }
 
     function findPanel() {
-        return document.getElementById("gif-picker-tab-panel");
+        return document.getElementById(SELECTORS.gifPanelId);
     }
 
     function scheduleMaintain() {
@@ -1254,7 +1534,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         maintainScheduled = true;
         queueMicrotask(() => {
             maintainScheduled = false;
-            maintain();
+            safeMaintain();
         });
     }
 
@@ -1264,9 +1544,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         pickerObserver = null;
         observedDrawer = drawerNode;
         if (!drawerNode) return;
-        pickerObserver = new MutationObserver(records => {
-            const hasElementMutation = records.some(record =>
-                [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === Node.ELEMENT_NODE)
+        pickerObserver = new MutationObserver((records) => {
+            const hasElementMutation = records.some((record) =>
+                [...record.addedNodes, ...record.removedNodes].some((node) => node.nodeType === 1)
             );
             if (!hasElementMutation) return;
             scheduleMaintain();
@@ -1287,10 +1567,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     }
 
     function normalizeLastView(value) {
-        if (value === "root" || value === "favorites" || value === "imports") {
+        if (ROOT_VIEWS.has(value)) {
             return { type: value };
         }
-        if (value && ["root", "favorites", "imports"].includes(value.type)) {
+        if (value && ROOT_VIEWS.has(value.type)) {
             return { type: value.type };
         }
         if (value && value.type === "category" && typeof value.label === "string" && value.label) {
@@ -1303,7 +1583,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         try {
             const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${LAST_VIEW_COOKIE}=([^;]+)`));
             if (match) return normalizeLastView(JSON.parse(decodeURIComponent(match[1])));
-        } catch { /* ignore */ }
+        } catch {
+            /* ignore */
+        }
         return { type: "favorites" };
     }
 
@@ -1311,13 +1593,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         lastView = normalizeLastView(view);
         try {
             document.cookie = `${LAST_VIEW_COOKIE}=${encodeURIComponent(JSON.stringify(lastView))}; path=/; max-age=31536000; SameSite=Lax`;
-        } catch { /* ignore */ }
+        } catch {
+            /* ignore */
+        }
     }
 
     function requestRestore() {
         restorePending = true;
         restoreTarget = normalizeLastView(lastView);
-        restoreDeadline = Date.now() + 5000;
+        restoreDeadline = Date.now() + TIMINGS.restoreWindow;
     }
 
     function finishRestore() {
@@ -1349,10 +1633,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!panel) return;
 
         const target = restoreTarget || lastView;
-        const backButton = panel.querySelector(".backButton_fed6d3");
+        const backButton = panel.querySelector(SELECTORS.nativeBackButton);
         const hasBack = !!backButton;
-        const favoritesView = !!panel.querySelector('[class*="favoritesHeader"]');
-        const searchValue = panel.querySelector('input[role="searchbox"]')?.value?.trim() || "";
+        const favoritesView = hasFavoritesView(panel);
+        const searchValue = panel.querySelector(SELECTORS.searchInput)?.value?.trim() || "";
         const favoritesCard = findRootGrid(panel)?.favoritesCard;
 
         if (target.type === "imports") {
@@ -1383,7 +1667,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                     finishRestore();
                     return;
                 }
-                const clearButton = panel.querySelector('[class*="clearButton"]');
+                const clearButton = panel.querySelector(SELECTORS.clearButton);
                 if (searchValue && clearButton) {
                     clickForRestore(clearButton);
                     return;
@@ -1397,8 +1681,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         if (target.type === "category") {
             if (!hasBack) {
-                const card = [...panel.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]')]
-                    .find(item => item.getAttribute("aria-label") === target.label);
+                const card = [...panel.querySelectorAll(SELECTORS.rootCards)].find(
+                    (item) => item.getAttribute("aria-label") === target.label
+                );
                 if (card) {
                     finishRestore();
                     clickForRestore(card);
@@ -1414,40 +1699,39 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     }
 
     function trackNativeBackButton(panel) {
-        const backButton = panel?.querySelector(".backButton_fed6d3");
+        const backButton = panel?.querySelector(SELECTORS.nativeBackButton);
         if (!backButton || backButton.dataset.vcViewTracking) return;
         backButton.dataset.vcViewTracking = "1";
         backButton.addEventListener("click", () => handleViewTracking({ type: "root" }), true);
     }
 
     function findRootGrid(panel) {
-        const cards = panel?.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
+        const cards = panel?.querySelectorAll(SELECTORS.rootCards);
         if (!cards || cards.length === 0) return null;
         const favoritesCard = cards[0];
-        if (!favoritesCard.querySelector('[class*="categoryText"], [class*="categoryName"]')) return null;
+        if (!favoritesCard.querySelector(SELECTORS.categoryLabel)) return null;
         const wrapper = favoritesCard.parentElement;
         if (!wrapper) return null;
         return { favoritesCard, wrapper };
     }
 
     function isRootGifView(panel) {
-        if (!panel || panel.querySelector(".backButton_fed6d3")) return false;
-        const search = panel.querySelector('input[role="searchbox"]');
+        if (!panel || panel.querySelector(SELECTORS.nativeBackButton)) return false;
+        const search = panel.querySelector(SELECTORS.searchInput);
         if (search && search.value.trim()) return false;
         return !!findRootGrid(panel);
     }
 
     function reflowRootGrid(wrapper) {
-        const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
+        const cards = [...wrapper.children].filter((child) => child.classList?.contains(SELECTORS.rootCardClass));
         if (cards.length === 0) return;
 
         const containerWidth = wrapper.clientWidth || wrapper.parentElement?.clientWidth || 806;
-        const columns = Math.min(
-            Math.max(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1),
-            MAX_ROOT_COLUMNS
-        );
-        const tileWidth = (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns;
+        const columns = clamp(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1, MAX_ROOT_COLUMNS);
+        const tileWidth = Math.max(1, (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns);
 
+        // The wrapper is intentionally never shrunk: Discord uses it as a
+        // scroll area and a smaller height would clip the last row.
         for (let index = 0; index < cards.length; index++) {
             const card = cards[index];
             card.style.position = "absolute";
@@ -1475,7 +1759,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         input.addEventListener("change", () => {
             const files = [...(input.files || [])];
             input.value = "";
-            handleFiles(files);
+            handleFiles(files).catch((error) => {
+                console.error(`${LOG_PREFIX} Import batch failed`, error);
+            });
         });
         document.body.appendChild(input);
     }
@@ -1494,7 +1780,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                     stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round"/>
             </svg>`;
-        button.addEventListener("click", event => {
+        button.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
             if (!busy) input?.click();
@@ -1507,6 +1793,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (statusEl?.isConnected) return statusEl;
         statusEl = document.createElement("div");
         statusEl.className = "vc-import-status";
+        statusEl.setAttribute("role", "status");
+        statusEl.setAttribute("aria-live", "polite");
         statusEl.style.display = "none";
         drawer.appendChild(statusEl);
         return statusEl;
@@ -1522,13 +1810,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (text && !keep) {
             statusTimer = setTimeout(() => {
                 if (statusEl) statusEl.style.display = "none";
-            }, 3500);
+            }, TIMINGS.status);
         }
     }
 
     function createCategoryCard() {
         const card = document.createElement("div");
-        card.className = "result__2dc39 vc-imported-category";
+        card.className = `${SELECTORS.rootCardClass} vc-imported-category`;
         card.style.position = "absolute";
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
@@ -1542,15 +1830,12 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             </div>
             <span class="vc-imported-category-count"></span>`;
 
-        const open = event => {
+        const open = (event) => {
             event.preventDefault();
             event.stopPropagation();
             openImportedView();
         };
-        card.addEventListener("click", open);
-        card.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") open(event);
-        });
+        addActivationHandler(card, open);
         return card;
     }
 
@@ -1583,10 +1868,10 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         categoryCard.remove();
         if (wrapper) {
             const first = wrapper.firstElementChild;
-            const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
+            const cards = [...wrapper.children].filter((child) => child.classList?.contains(SELECTORS.rootCardClass));
             const firstHeight = parseFloat(first?.style.height) || 0;
-            const uniform = cards.every(card => Math.abs((parseFloat(card.style.height) || 0) - firstHeight) < 0.5);
-            if (first?.querySelector('[class*="categoryText"], [class*="categoryName"]') && uniform) {
+            const uniform = cards.every((card) => Math.abs((parseFloat(card.style.height) || 0) - firstHeight) < 0.5);
+            if (first?.querySelector(SELECTORS.categoryLabel) && uniform) {
                 reflowRootGrid(wrapper);
             }
         }
@@ -1607,14 +1892,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!categoryCard) {
             categoryCard = createCategoryCard();
         }
-        if (!categoryCard.isConnected
-            || categoryCard.parentElement !== grid.wrapper
-            || grid.favoritesCard.nextElementSibling !== categoryCard) {
+        if (
+            !categoryCard.isConnected ||
+            categoryCard.parentElement !== grid.wrapper ||
+            grid.favoritesCard.nextElementSibling !== categoryCard
+        ) {
             grid.favoritesCard.after(categoryCard);
         }
 
         for (const card of grid.wrapper.children) {
-            if (card === categoryCard || !card.classList?.contains("result__2dc39") || card.dataset.vcViewTracking) continue;
+            if (
+                card === categoryCard ||
+                !card.classList?.contains(SELECTORS.rootCardClass) ||
+                card.dataset.vcViewTracking
+            )
+                continue;
             card.dataset.vcViewTracking = "1";
             card.addEventListener("click", () => {
                 if (card === grid.wrapper.firstElementChild) {
@@ -1633,6 +1925,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function createImportedView() {
         const view = document.createElement("div");
         view.className = "vc-imported-view";
+        view.setAttribute("role", "region");
+        view.setAttribute("aria-label", t("categoryName"));
         view.innerHTML = `
             <div class="vc-imported-header">
                 <div class="vc-imported-back" role="button" tabindex="0" aria-label="${t("back")}">${BACK_ICON}</div>
@@ -1655,18 +1949,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             </div>`;
 
         const back = view.querySelector(".vc-imported-back");
-        const close = event => {
+        const close = (event) => {
             event.preventDefault();
             event.stopPropagation();
             finishRestore();
             closeImportedView();
             saveLastView({ type: "root" });
-            document.querySelector(".backButton_fed6d3")?.click();
+            document.querySelector(SELECTORS.nativeBackButton)?.click();
         };
-        back.addEventListener("click", close);
-        back.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") close(event);
-        });
+        addActivationHandler(back, close);
 
         const searchInput = view.querySelector(".vc-imported-search-input");
         const clearButton = view.querySelector(".vc-imported-search-clear");
@@ -1680,7 +1971,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             renderImportedView(true);
         };
         searchInput.addEventListener("input", runSearch);
-        searchInput.addEventListener("keydown", event => {
+        searchInput.addEventListener("keydown", (event) => {
             if (event.key === "Escape" && searchInput.value) {
                 event.preventDefault();
                 searchInput.value = "";
@@ -1690,7 +1981,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             }
         });
 
-        const clear = event => {
+        const clear = (event) => {
             event.preventDefault();
             event.stopPropagation();
             searchInput.value = "";
@@ -1699,32 +1990,18 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             renderImportedView(true);
             searchInput.focus();
         };
-        clearButton.addEventListener("click", clear);
-        clearButton.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") clear(event);
-        });
+        addActivationHandler(clearButton, clear);
         syncClear();
 
         return view;
     }
 
+    /** Renders the imported category, reusing the DOM when nothing changed. */
     function renderImportedView(force = false) {
         if (!overlay?.isConnected) return;
 
-        const nativeMatches = getImportedNativeMatches();
-        const favoriteKeysById = new Map();
-        for (const { record, entry } of nativeMatches) {
-            let keys = favoriteKeysById.get(record.id);
-            if (!keys) {
-                keys = new Set();
-                favoriteKeysById.set(record.id, keys);
-            }
-            keys.add(entry.key);
-        }
-
-        const key = imports
-            .map(record => `${record.id}:${favoriteKeysById.has(record.id) ? "1" : "0"}`)
-            .join("|");
+        const { byRecordId: favoriteKeysById } = buildImportFavoriteIndex();
+        const key = imports.map((record) => `${record.id}:${favoriteKeysById.has(record.id) ? "1" : "0"}`).join("|");
         if (!force && key === overlayKey) return;
         overlayKey = key;
 
@@ -1734,7 +2011,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         const query = importedQuery.trim().toLowerCase();
         const visibleImports = query
-            ? imports.filter(record => record.name.toLowerCase().includes(query))
+            ? imports.filter((record) =>
+                  String(record.name || "")
+                      .toLowerCase()
+                      .includes(query)
+              )
             : imports;
 
         if (imports.length === 0) {
@@ -1747,9 +2028,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         const emptyLabel = empty.querySelector("span");
         if (emptyLabel) {
-            emptyLabel.textContent = query
-                ? t("noResults", { query: importedQuery.trim() })
-                : t("emptyImports");
+            emptyLabel.textContent = query ? t("noResults", { query: importedQuery.trim() }) : t("emptyImports");
         }
         empty.style.display = visibleImports.length === 0 ? "flex" : "none";
         grid.style.display = "grid";
@@ -1764,7 +2043,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             addTile.innerHTML = `
                 <span class="vc-imported-add-icon">${UPLOAD_ICON}</span>
                 <span class="vc-imported-add-label">${t("importTile")}</span>`;
-            addTile.addEventListener("click", event => {
+            addTile.addEventListener("click", (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 if (!busy) input?.click();
@@ -1775,9 +2054,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         for (const record of visibleImports) {
             const tile = document.createElement("div");
             tile.className = "vc-imported-tile";
-            tile.dataset.aspect = record.width && record.height
-                ? String(record.height / record.width)
-                : "1";
+            tile.dataset.aspect = record.width && record.height ? String(record.height / record.width) : "1";
 
             const attach = document.createElement("button");
             attach.type = "button";
@@ -1790,7 +2067,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             image.loading = "lazy";
             image.draggable = false;
             attach.appendChild(image);
-            attach.addEventListener("click", event => {
+            attach.addEventListener("click", (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 attachToComposer(record);
@@ -1799,58 +2076,49 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const favoriteKeys = favoriteKeysById.get(record.id);
             const isFavorite = !!favoriteKeys?.size;
 
-            const favorite = document.createElement("div");
-            favorite.className = `favButton__2dc39 gifFavoriteButton__43deb vc-imported-favorite${isFavorite ? " selected__43deb" : ""}`;
-            favorite.setAttribute("role", "button");
-            favorite.setAttribute("tabindex", "0");
-            favorite.setAttribute("aria-label", isFavorite ? t("removeFavorite") : t("addFavorite"));
-            favorite.innerHTML = STAR_ICON;
-
-            const toggleFavorite = event => {
-                event.preventDefault();
-                event.stopPropagation();
-                const keys = [...new Set(getFavoriteKeysForRecord(record))];
-                if (keys.length === 0) {
-                    setStatus(t("favoriteNeedsSend"));
-                    return;
-                }
-
-                const unfavorite = getUnfavoriteAction();
-                if (!unfavorite) {
-                    setStatus(t("favoriteFailed"), true);
-                    return;
-                }
-
-                for (const key of keys) {
-                    try {
-                        unfavorite(key);
-                    } catch (error) {
-                        console.error("[PickerImport] Failed to remove favorite", error);
+            const favorite = createIconAction({
+                className: `favButton__2dc39 gifFavoriteButton__43deb vc-imported-favorite${isFavorite ? " selected__43deb" : ""}`,
+                label: isFavorite ? t("removeFavorite") : t("addFavorite"),
+                icon: STAR_ICON,
+                onActivate(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const keys = getFavoriteKeysForRecord(record);
+                    if (keys.length === 0) {
+                        setStatus(t("favoriteNeedsSend"));
+                        return;
                     }
+
+                    const unfavorite = getUnfavoriteAction();
+                    if (!unfavorite) {
+                        setStatus(t("favoriteFailed"), true);
+                        return;
+                    }
+
+                    for (const key of keys) {
+                        try {
+                            unfavorite(key);
+                        } catch (error) {
+                            console.error(`${LOG_PREFIX} Failed to remove favorite`, error);
+                        }
+                    }
+                    setStatus(t("favoriteRemoved"));
+                    setTimeout(() => renderImportedView(true), TIMINGS.favoriteRefresh);
                 }
-                setStatus(t("favoriteRemoved"));
-                setTimeout(() => renderImportedView(true), 350);
-            };
-            favorite.addEventListener("click", toggleFavorite);
-            favorite.addEventListener("keydown", event => {
-                if (event.key === "Enter" || event.key === " ") toggleFavorite(event);
             });
 
-            const remove = document.createElement("div");
-            remove.className = "favButton__2dc39 gifFavoriteButton__43deb vc-imported-delete";
-            remove.setAttribute("role", "button");
-            remove.setAttribute("tabindex", "0");
-            remove.setAttribute("aria-label", t("deleteImport", { name: record.name }));
-            remove.innerHTML = TRASH_ICON;
-
-            const activate = event => {
-                event.preventDefault();
-                event.stopPropagation();
-                deleteImportedCompletely([record], getFavoriteKeysForRecord(record));
-            };
-            remove.addEventListener("click", activate);
-            remove.addEventListener("keydown", event => {
-                if (event.key === "Enter" || event.key === " ") activate(event);
+            const remove = createIconAction({
+                className: "favButton__2dc39 gifFavoriteButton__43deb vc-imported-delete",
+                label: t("deleteImport", { name: record.name }),
+                icon: TRASH_ICON,
+                onActivate(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    deleteImportedCompletely([record], getFavoriteKeysForRecord(record)).catch((error) => {
+                        console.error(`${LOG_PREFIX} Delete failed`, error);
+                        setStatus(t("deleteFailed"), true);
+                    });
+                }
             });
 
             tile.append(attach, favorite, remove);
@@ -1860,14 +2128,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         layoutImportedTiles(true);
     }
 
+    /** Lays out imported tiles in a balanced masonry grid. */
     function layoutImportedTiles(force = false) {
         if (!overlay?.isConnected) return;
         const grid = overlay.querySelector(".vc-imported-grid");
-        const tiles = [...(grid?.children || [])];
         if (!grid) return;
+        const tiles = [...grid.children];
 
         const containerWidth = overlay.clientWidth;
-        if (!containerWidth) return;
+        if (!Number.isFinite(containerWidth) || containerWidth <= 0) return;
 
         if (tiles.length === 0) {
             grid.style.width = `${containerWidth}px`;
@@ -1877,8 +2146,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (!force && containerWidth === overlayLayoutWidth) return;
         overlayLayoutWidth = containerWidth;
 
-        const columns = Math.min(Math.max(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1), MAX_COLUMNS);
-        const tileWidth = (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns;
+        const columns = clamp(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1, MAX_COLUMNS);
+        const tileWidth = Math.max(1, (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns);
         const heights = new Array(columns).fill(0);
 
         for (const tile of tiles) {
@@ -1898,7 +2167,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
 
         grid.style.width = `${containerWidth}px`;
-        grid.style.height = `${Math.max(...heights) - GRID_GAP}px`;
+        grid.style.height = `${Math.max(0, Math.max(...heights) - GRID_GAP)}px`;
     }
 
     function openImportedView() {
@@ -1918,7 +2187,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         importedQuery = "";
         overlay?.remove();
         overlay = null;
-        overlayKey = "";
+        overlayKey = null;
         overlayLayoutWidth = 0;
     }
 
@@ -1932,7 +2201,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             overlay?.remove();
             overlay = createImportedView();
             panel.appendChild(overlay);
-            overlayKey = "";
+            overlayKey = null;
             overlayLayoutWidth = 0;
         }
 
@@ -1941,109 +2210,127 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     }
 
     function getNativeFavoriteEntries() {
-        const gifs = window.Vencord?.Webpack?.Common?.UserSettingsProtoStore
-            ?.frecencyWithoutFetchingLatest?.favoriteGifs?.gifs;
+        const gifs = getWebpackCommon()?.UserSettingsProtoStore?.frecencyWithoutFetchingLatest?.favoriteGifs?.gifs;
         if (!gifs) return [];
 
         const entries = [];
         for (const [key, gif] of Object.entries(gifs)) {
+            if (!gif) continue;
             const src = gif.src || gif.url || gif.gifSrc;
             if (!src) continue;
+            const pathname = toPathname(src);
+            if (!pathname) continue;
             try {
-                const pathname = new URL(src, location.href).pathname.toLowerCase();
                 const name = decodeURIComponent(pathname.split("/").pop() || "").toLowerCase();
                 if (!name) continue;
                 entries.push({ key, pathname, name, width: gif.width, height: gif.height });
-            } catch { /* ignore */ }
+            } catch {
+                /* Ignore malformed favorite filenames. */
+            }
         }
         return entries;
     }
 
-    function getImportedNativeMatches() {
+    const FAVORITE_SIZE_TOLERANCE = 2;
+
+    function addToIndex(map, key, value) {
+        let values = map.get(key);
+        if (!values) {
+            values = new Set();
+            map.set(key, values);
+        }
+        values.add(value);
+    }
+
+    /**
+     * Matches local imports against native favorites once and exposes the
+     * result in the shapes needed by the UI: per import, per URL path, and
+     * as a flat list for tests and diagnostics.
+     */
+    function buildImportFavoriteIndex() {
         const entries = getNativeFavoriteEntries();
         const matches = [];
+        const byRecordId = new Map();
+        const byPath = new Map();
 
         for (const record of imports) {
-            const name = record.name.toLowerCase();
+            const name = String(record.name || "").toLowerCase();
             for (const entry of entries) {
                 if (entry.name !== name) continue;
-                if (entry.width && record.width && Math.abs(entry.width - record.width) > 2) continue;
-                if (entry.height && record.height && Math.abs(entry.height - record.height) > 2) continue;
+                if (entry.width && record.width && Math.abs(entry.width - record.width) > FAVORITE_SIZE_TOLERANCE)
+                    continue;
+                if (entry.height && record.height && Math.abs(entry.height - record.height) > FAVORITE_SIZE_TOLERANCE)
+                    continue;
+
                 matches.push({ record, entry });
+                addToIndex(byRecordId, record.id, entry.key);
+
+                let pathMatch = byPath.get(entry.pathname);
+                if (!pathMatch) {
+                    pathMatch = { records: [], entries: [] };
+                    byPath.set(entry.pathname, pathMatch);
+                }
+                if (!pathMatch.records.includes(record)) pathMatch.records.push(record);
+                if (!pathMatch.entries.includes(entry)) pathMatch.entries.push(entry);
             }
         }
 
-        return matches;
+        return { matches, byRecordId, byPath };
+    }
+
+    function getImportedNativeMatches() {
+        return buildImportFavoriteIndex().matches;
     }
 
     function getFavoriteKeysForRecord(record) {
-        return getImportedNativeMatches()
-            .filter(match => match.record.id === record.id)
-            .map(match => match.entry.key);
+        return [...(buildImportFavoriteIndex().byRecordId.get(record.id) ?? [])];
     }
+
+    let cachedUnfavoriteAction = null;
 
     function getUnfavoriteAction() {
-        try {
-            const module = window.Vencord?.Webpack?.findByProps?.("Tr", "wg");
-            if (typeof module?.Tr === "function") return module.Tr;
-        } catch { /* ignore */ }
-        return null;
+        if (cachedUnfavoriteAction) return cachedUnfavoriteAction;
+        const module = findByProps("Tr", "wg");
+        if (typeof module?.Tr === "function") cachedUnfavoriteAction = module.Tr;
+        return cachedUnfavoriteAction;
     }
 
-    function createNativeDeleteButton() {
-        const button = document.createElement("div");
-        button.className = "favButton__2dc39 gifFavoriteButton__43deb vc-native-delete";
-        button.setAttribute("role", "button");
-        button.setAttribute("tabindex", "0");
-        button.setAttribute("aria-label", t("deleteCompletely"));
-        button.innerHTML = TRASH_ICON;
+    const nativeDeleteTargets = new WeakMap();
 
-        const activate = event => {
-            event.preventDefault();
-            event.stopPropagation();
-            const records = button.__records || [];
-            const favoriteKeys = button.__favoriteKeys || [];
-            deleteImportedCompletely(records, favoriteKeys);
-        };
-        button.addEventListener("click", activate);
-        button.addEventListener("keydown", event => {
-            if (event.key === "Enter" || event.key === " ") activate(event);
+    function createNativeDeleteButton() {
+        return createIconAction({
+            className: "favButton__2dc39 gifFavoriteButton__43deb vc-native-delete",
+            label: t("deleteCompletely"),
+            icon: TRASH_ICON,
+            onActivate(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const target = nativeDeleteTargets.get(event.currentTarget);
+                if (!target) return;
+                deleteImportedCompletely(target.records, target.favoriteKeys).catch((error) => {
+                    console.error(`${LOG_PREFIX} Delete failed`, error);
+                    setStatus(t("deleteFailed"), true);
+                });
+            }
         });
-        return button;
     }
 
     function maintainNativeDeleteButtons(panel) {
-        const favoritesView = !!panel?.querySelector('[class*="favoritesHeader"]');
-        if (!favoritesView) {
-            panel?.querySelectorAll(".vc-native-delete").forEach(button => button.remove());
+        if (!hasFavoritesView(panel)) {
+            panel?.querySelectorAll(".vc-native-delete").forEach((button) => button.remove());
             return;
         }
 
-        const matches = getImportedNativeMatches();
-        const byPath = new Map();
-        for (const { record, entry } of matches) {
-            let match = byPath.get(entry.pathname);
-            if (!match) {
-                match = { records: [], entries: [] };
-                byPath.set(entry.pathname, match);
-            }
-            if (!match.records.includes(record)) match.records.push(record);
-            if (!match.entries.includes(entry)) match.entries.push(entry);
-        }
-
+        const { byPath } = buildImportFavoriteIndex();
         const seen = new Set();
-        const tiles = panel.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
+        const tiles = panel.querySelectorAll(SELECTORS.rootCards);
         for (const tile of tiles) {
             const media = tile.querySelector("img, video");
             const src = media?.currentSrc || media?.src;
             if (!src) continue;
 
-            let pathname;
-            try {
-                pathname = new URL(src, location.href).pathname.toLowerCase();
-            } catch {
-                continue;
-            }
+            const pathname = toPathname(src);
+            if (!pathname) continue;
 
             const match = byPath.get(pathname);
             if (!match) continue;
@@ -2054,11 +2341,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 button = createNativeDeleteButton();
                 tile.appendChild(button);
             }
-            button.__records = match.records;
-            button.__favoriteKeys = match.entries.map(entry => entry.key);
+            nativeDeleteTargets.set(button, {
+                records: match.records,
+                favoriteKeys: match.entries.map((entry) => entry.key)
+            });
         }
 
-        panel.querySelectorAll(".vc-native-delete").forEach(button => {
+        panel.querySelectorAll(".vc-native-delete").forEach((button) => {
             if (!seen.has(button.parentElement)) button.remove();
         });
     }
@@ -2066,24 +2355,31 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     async function deleteImportedCompletely(records, favoriteKeys) {
         if (!records?.length) return;
 
+        const keys = favoriteKeys ?? [];
         const unfavorite = getUnfavoriteAction();
+        let favoriteRemoved = false;
         if (unfavorite) {
-            for (const key of new Set(favoriteKeys)) {
+            for (const key of new Set(keys)) {
                 try {
                     unfavorite(key);
+                    favoriteRemoved = true;
                 } catch (error) {
-                    console.error("[PickerImport] Failed to remove native favorite", error);
+                    console.error(`${LOG_PREFIX} Failed to remove native favorite`, error);
                 }
             }
         }
 
-        for (const record of records) {
-            await deleteRecord(record);
+        const deleted = await deleteRecords(records);
+        if (!deleted) {
+            setStatus(t("deleteFailed"), true);
+        } else if (favoriteRemoved) {
+            setStatus(t("deletedWithFavorite"));
+        } else {
+            setStatus(t("deleted"));
         }
-
-        if (favoriteKeys.length > 0) setStatus(t("deletedWithFavorite"));
     }
 
+    /** Single entry point for all DOM/resize/timer-driven UI synchronization. */
     function maintain() {
         const currentDrawer = findDrawer();
         const panel = findPanel();
@@ -2115,6 +2411,11 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             return;
         }
 
+        // Replaces the legacy 300 ms resize poll: maintain() already runs on
+        // every relevant DOM/resize mutation and periodically as a fallback.
+        initDrawer(currentDrawer);
+        setupGifObserver();
+
         ensureInput();
         const btn = ensureButton();
         btn.style.display = panel ? "flex" : "none";
@@ -2134,24 +2435,37 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         maintainImportedView(panel);
 
         if (importedView) {
-            panel.querySelectorAll(".vc-native-delete").forEach(button => button.remove());
+            panel.querySelectorAll(".vc-native-delete").forEach((button) => button.remove());
         } else {
             maintainNativeDeleteButtons(panel);
         }
     }
 
+    /** Prevents a transient Discord DOM change from breaking the UI loop. */
+    function safeMaintain() {
+        try {
+            maintain();
+        } catch (error) {
+            console.error(`${LOG_PREFIX} Maintenance failed`, error);
+        }
+    }
+
     async function loadImports() {
         try {
-            imports = (await getAllImports()).sort((a, b) => b.createdAt - a.createdAt);
+            imports = (await getAllImports()).sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
         } catch (error) {
-            console.error("[PickerImport] Failed to load imports", error);
+            console.error(`${LOG_PREFIX} Failed to load imports`, error);
             imports = [];
         }
 
         for (const url of objectUrls.values()) URL.revokeObjectURL(url);
         objectUrls.clear();
         for (const record of imports) {
-            objectUrls.set(record.id, URL.createObjectURL(record.blob));
+            try {
+                objectUrls.set(record.id, URL.createObjectURL(record.blob));
+            } catch (error) {
+                console.error(`${LOG_PREFIX} Failed to create preview URL`, error);
+            }
         }
         categoryPreviewId = "";
         if (overlay) renderImportedView(true);
@@ -2160,39 +2474,48 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
     function closePicker() {
         try {
-            const store = window.Vencord?.Webpack?.Common?.ExpressionPickerStore;
+            const store = getWebpackCommon()?.ExpressionPickerStore;
             if (typeof store?.closeExpressionPicker === "function") {
                 store.closeExpressionPicker();
                 return true;
             }
-        } catch { /* ignore */ }
+        } catch {
+            /* Fall back to the legacy action below. */
+        }
+
         try {
-            const actions = window.Vencord?.Webpack?.findByProps?.("v8", "RQ");
+            const actions = findByProps("v8", "RQ");
             if (typeof actions?.v8 === "function") {
                 actions.v8();
                 return true;
             }
-        } catch { /* ignore */ }
+        } catch {
+            /* Discord internals changed. */
+        }
         return false;
     }
 
     function focusComposerWhenReady(attempt = 0) {
         if (findDrawer()) {
-            if (attempt < 12) setTimeout(() => focusComposerWhenReady(attempt + 1), 50);
+            if (attempt < ATTEMPTS.composerFocus) {
+                setTimeout(() => focusComposerWhenReady(attempt + 1), TIMINGS.composerFocusRetry);
+            }
             return;
         }
 
-        const editor = document.querySelector('[data-slate-editor="true"]');
+        const editor = document.querySelector(SELECTORS.slateEditor);
         if (editor?.isConnected) {
             editor.focus();
             if (document.activeElement === editor) return;
         }
 
-        if (attempt < 12) setTimeout(() => focusComposerWhenReady(attempt + 1), 50);
+        if (attempt < ATTEMPTS.composerFocus) {
+            setTimeout(() => focusComposerWhenReady(attempt + 1), TIMINGS.composerFocusRetry);
+        }
     }
 
     function attachToComposer(record) {
-        const common = window.Vencord?.Webpack?.Common;
+        const common = getWebpackCommon();
         const uploadManager = common?.UploadManager;
         const channelId = common?.SelectedChannelStore?.getChannelId?.();
         if (!uploadManager || !channelId) {
@@ -2204,39 +2527,54 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         const upload = {
             id: `vc-import-${record.id}`,
             file,
-            platform: 1, // WEB
+            platform: UPLOAD_PLATFORM_WEB,
             origin: "file_picker"
         };
 
-        uploadManager.addFile({
-            file: upload,
-            channelId,
-            draftType: 0, // ChannelMessage
-            allowOptimization: false
-        });
+        try {
+            uploadManager.addFile({
+                file: upload,
+                channelId,
+                draftType: DRAFT_TYPE_CHANNEL_MESSAGE,
+                allowOptimization: false
+            });
+        } catch (error) {
+            console.error(`${LOG_PREFIX} Failed to attach GIF`, error);
+            setStatus(t("attachFailed"), true);
+            return;
+        }
 
         const closed = closePicker();
         focusComposerWhenReady();
         if (!closed) setStatus(t("attached"));
     }
 
-    async function deleteRecord(record) {
-        try {
-            await removeImport(record.id);
-        } catch (error) {
-            console.error("[PickerImport] Failed to delete import", error);
-            setStatus(t("deleteFailed"), true);
-            return;
+    async function deleteRecords(records) {
+        const deletedIds = new Set();
+        for (const record of records) {
+            try {
+                await removeImport(record.id);
+                deletedIds.add(record.id);
+            } catch (error) {
+                console.error(`${LOG_PREFIX} Failed to delete import`, error);
+            }
         }
-        const url = objectUrls.get(record.id);
-        if (url) URL.revokeObjectURL(url);
-        objectUrls.delete(record.id);
-        imports = imports.filter(item => item.id !== record.id);
+
+        if (deletedIds.size === 0) return false;
+
+        for (const id of deletedIds) {
+            const url = objectUrls.get(id);
+            if (url) URL.revokeObjectURL(url);
+            objectUrls.delete(id);
+        }
+        imports = imports.filter((item) => !deletedIds.has(item.id));
+        categoryPreviewId = "";
         renderImportedView(true);
         updateCategoryCardContent();
-        setStatus(t("deleted"));
+        return true;
     }
 
+    /** Imports a batch sequentially so the UI stays responsive between files. */
     async function handleFiles(files) {
         if (busy || files.length === 0) return;
         busy = true;
@@ -2244,60 +2582,72 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         let added = 0;
         let failed = 0;
-        for (let index = 0; index < files.length; index++) {
-            const file = files[index];
-            setStatus(t("converting", {
-                current: index + 1,
-                total: files.length,
-                name: file.name
-            }), false, true);
-            try {
-                const record = await importFile(file);
-                await putImport(record);
-                added++;
-            } catch (error) {
-                failed++;
-                console.error("[PickerImport]", file.name, error);
-                setStatus(t("conversionFailed", {
-                    name: file.name,
-                    message: error?.message || t("conversionFailedGeneric")
-                }), true);
-                await sleep(1300);
+        try {
+            for (let index = 0; index < files.length; index++) {
+                const file = files[index];
+                setStatus(
+                    t("converting", {
+                        current: index + 1,
+                        total: files.length,
+                        name: file.name
+                    }),
+                    false,
+                    true
+                );
+                try {
+                    const record = await importFile(file);
+                    await putImport(record);
+                    added++;
+                } catch (error) {
+                    failed++;
+                    console.error(`${LOG_PREFIX} Import failed`, file.name, error);
+                    setStatus(
+                        t("conversionFailed", {
+                            name: file.name,
+                            message: error?.message || t("conversionFailedGeneric")
+                        }),
+                        true
+                    );
+                    await delay(TIMINGS.importError);
+                }
+                await yieldToUI();
             }
-            await yieldUI();
-        }
 
-        await loadImports();
-        busy = false;
-        if (button) button.disabled = false;
-        if (added > 0) {
-            openImportedView();
-            setStatus(t("importedCount", { count: added }));
-        } else if (failed > 0) {
-            setStatus(t("noneImported"), true);
-        } else {
-            setStatus("");
+            await loadImports();
+            if (added > 0) {
+                openImportedView();
+                setStatus(t("importedCount", { count: added }));
+            } else if (failed > 0) {
+                setStatus(t("noneImported"), true);
+            } else {
+                setStatus("");
+            }
+        } finally {
+            busy = false;
+            if (button) button.disabled = false;
         }
     }
 
+    /** Validates an input file, converts it when needed, and builds its record. */
     async function importFile(file) {
         if (file.size > MAX_INPUT_BYTES) {
             throw new Error(t("fileTooLarge"));
         }
 
-        const type = (file.type || "").toLowerCase();
-        const name = file.name.toLowerCase();
+        const originalName = String(file.name || "import");
+        const type = String(file.type || "").toLowerCase();
+        const name = originalName.toLowerCase();
         let result;
 
-        if (type === "image/gif" || name.endsWith(".gif")) {
+        if (type === "image/gif" || hasExtension(name, GIF_EXTENSIONS)) {
             if (file.size > MAX_OUTPUT_BYTES) {
                 throw new Error(t("gifTooLarge"));
             }
             const dimensions = await measureImage(file);
             result = { blob: file, width: dimensions.width, height: dimensions.height };
-        } else if (type.startsWith("video/") || /\.(mp4|webm|mov|mkv|m4v)$/i.test(name)) {
+        } else if (type.startsWith("video/") || hasExtension(name, VIDEO_EXTENSIONS)) {
             result = await convertVideo(file);
-        } else if (type.startsWith("image/") || /\.(png|jpe?g|webp|avif|apng|bmp)$/i.test(name)) {
+        } else if (type.startsWith("image/") || hasExtension(name, IMAGE_EXTENSIONS)) {
             result = await convertImage(file);
         } else {
             throw new Error(t("unsupportedFormat"));
@@ -2307,9 +2657,14 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             throw new Error(t("convertedTooLarge"));
         }
 
+        const id =
+            typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
         return {
-            id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            name: file.name.replace(/\.[^.]+$/, "") + ".gif",
+            id,
+            name: originalName.replace(/\.[^.]+$/, "") + ".gif",
             blob: result.blob,
             width: result.width,
             height: result.height,
@@ -2323,13 +2678,23 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             const bitmap = await createImageBitmap(blob);
             const dimensions = { width: bitmap.width, height: bitmap.height };
             bitmap.close?.();
+            if (!dimensions.width || !dimensions.height) {
+                throw new Error(t("imageUnreadable"));
+            }
             return dimensions;
         } catch {
+            if (typeof Image !== "function") {
+                throw new Error(t("imageUnreadable"));
+            }
             return new Promise((resolve, reject) => {
                 const image = new Image();
                 const url = URL.createObjectURL(blob);
                 image.onload = () => {
                     URL.revokeObjectURL(url);
+                    if (!image.naturalWidth || !image.naturalHeight) {
+                        reject(new Error(t("imageUnreadable")));
+                        return;
+                    }
                     resolve({ width: image.naturalWidth, height: image.naturalHeight });
                 };
                 image.onerror = () => {
@@ -2341,6 +2706,30 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
     }
 
+    function createCanvas(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) throw new Error(t("conversionFailedGeneric"));
+        context.imageSmoothingQuality = "high";
+        return { canvas, context };
+    }
+
+    function captureFrame(context, source, width, height, delay) {
+        context.clearRect(0, 0, width, height);
+        context.drawImage(source, 0, 0, width, height);
+        return {
+            data: context.getImageData(0, 0, width, height).data,
+            delay
+        };
+    }
+
+    function encodeSingleFrame(source, width, height, delay = 1000) {
+        const { context } = createCanvas(width, height);
+        return encodeFrames([captureFrame(context, source, width, height, delay)], width, height);
+    }
+
     async function convertImage(file) {
         if (typeof ImageDecoder === "function") {
             let decoder = null;
@@ -2349,37 +2738,32 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 decoder = new ImageDecoder({ data, type: file.type || "image/png" });
                 await decoder.tracks.ready;
                 const track = decoder.tracks.selectedTrack;
-                const frameCount = Math.max(1, Math.min(track?.frameCount ?? 1, MAX_IMAGE_FRAMES));
+                const frameCount = clamp(track?.frameCount ?? 1, 1, MAX_IMAGE_FRAMES);
 
                 const first = await decoder.decode({ frameIndex: 0 });
                 const sourceWidth = first.image.displayWidth || first.image.codedWidth;
                 const sourceHeight = first.image.displayHeight || first.image.codedHeight;
+                if (!sourceWidth || !sourceHeight) throw new Error(t("imageUnreadable"));
                 const { width, height } = fit(sourceWidth, sourceHeight);
 
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                const context = canvas.getContext("2d", { willReadFrequently: true });
-                context.imageSmoothingQuality = "high";
-
+                const { context } = createCanvas(width, height);
                 const frames = [];
                 let totalDelay = 0;
                 for (let index = 0; index < frameCount && totalDelay < MAX_DURATION * 1000; index++) {
                     const frame = index === 0 ? first : await decoder.decode({ frameIndex: index });
                     const rawDuration = frame.image.duration;
-                    const delay = frameCount === 1
-                        ? 1000
-                        : Math.min(1000, Math.max(20, Math.round((rawDuration || 100000) / 1000)));
+                    const delay =
+                        frameCount === 1
+                            ? 1000
+                            : Math.min(1000, Math.max(20, Math.round((rawDuration || 100000) / 1000)));
 
-                    context.clearRect(0, 0, width, height);
-                    context.drawImage(frame.image, 0, 0, width, height);
-                    frames.push({
-                        data: context.getImageData(0, 0, width, height).data,
-                        delay
-                    });
-                    frame.image.close?.();
+                    try {
+                        frames.push(captureFrame(context, frame.image, width, height, delay));
+                    } finally {
+                        frame.image.close?.();
+                    }
                     totalDelay += delay;
-                    if (index % 2 === 0) await yieldUI();
+                    if (index % 2 === 0) await yieldToUI();
                 }
 
                 if (frames.length === 0) throw new Error(t("noFrames"));
@@ -2389,9 +2773,13 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                     height
                 };
             } catch (error) {
-                console.warn("[PickerImport] ImageDecoder failed, trying static image", error);
+                console.warn(`${LOG_PREFIX} ImageDecoder failed, trying static image`, error);
             } finally {
-                try { decoder?.close?.(); } catch { /* ignore */ }
+                try {
+                    decoder?.close?.();
+                } catch {
+                    /* The decoder may already be closed. */
+                }
             }
         }
 
@@ -2401,22 +2789,21 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         } catch {
             throw new Error(t("imageUnreadable"));
         }
+        if (!bitmap.width || !bitmap.height) {
+            bitmap.close?.();
+            throw new Error(t("imageUnreadable"));
+        }
+
         const { width, height } = fit(bitmap.width, bitmap.height);
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext("2d", { willReadFrequently: true });
-        context.imageSmoothingQuality = "high";
-        context.drawImage(bitmap, 0, 0, width, height);
-        bitmap.close?.();
-        return {
-            blob: encodeFrames([{
-                data: context.getImageData(0, 0, width, height).data,
-                delay: 1000
-            }], width, height),
-            width,
-            height
-        };
+        try {
+            return {
+                blob: encodeSingleFrame(bitmap, width, height, 1000),
+                width,
+                height
+            };
+        } finally {
+            bitmap.close?.();
+        }
     }
 
     async function convertVideo(file) {
@@ -2429,15 +2816,20 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
         try {
             await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error(t("videoReadTimeout"))), 15000);
-                video.onloadedmetadata = () => {
+                let settled = false;
+                let timeout = 0;
+                const finish = (callback, value) => {
+                    if (settled) return;
+                    settled = true;
                     clearTimeout(timeout);
-                    resolve();
+                    video.onloadedmetadata = null;
+                    video.onerror = null;
+                    callback(value);
                 };
-                video.onerror = () => {
-                    clearTimeout(timeout);
-                    reject(new Error(t("videoUnsupported")));
-                };
+
+                timeout = setTimeout(() => finish(reject, new Error(t("videoReadTimeout"))), TIMINGS.videoMetadata);
+                video.onloadedmetadata = () => finish(resolve);
+                video.onerror = () => finish(reject, new Error(t("videoUnsupported")));
             });
 
             const sourceWidth = video.videoWidth;
@@ -2445,28 +2837,20 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             if (!sourceWidth || !sourceHeight) throw new Error(t("invalidVideoDimensions"));
 
             const { width, height } = fit(sourceWidth, sourceHeight);
-            const duration = Number.isFinite(video.duration) && video.duration > 0
-                ? Math.min(video.duration, MAX_DURATION)
-                : MAX_DURATION;
-            const frameCount = Math.max(1, Math.min(MAX_VIDEO_FRAMES, Math.ceil(duration * FPS)));
+            const duration =
+                Number.isFinite(video.duration) && video.duration > 0
+                    ? Math.min(video.duration, MAX_DURATION)
+                    : MAX_DURATION;
+            const frameCount = clamp(Math.ceil(duration * FPS), 1, MAX_VIDEO_FRAMES);
 
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const context = canvas.getContext("2d", { willReadFrequently: true });
-            context.imageSmoothingQuality = "high";
-
+            const { context } = createCanvas(width, height);
             const frames = [];
+            const frameDelay = Math.round(1000 / FPS);
             for (let index = 0; index < frameCount; index++) {
-                const time = Math.min(Math.max(0, duration - 0.001), index / FPS);
+                const time = clamp(duration - 0.001, 0, index / FPS);
                 await seekVideo(video, time);
-                context.clearRect(0, 0, width, height);
-                context.drawImage(video, 0, 0, width, height);
-                frames.push({
-                    data: context.getImageData(0, 0, width, height).data,
-                    delay: Math.round(1000 / FPS)
-                });
-                if (index % 2 === 0) await yieldUI();
+                frames.push(captureFrame(context, video, width, height, frameDelay));
+                if (index % 2 === 0) await yieldToUI();
             }
 
             return {
@@ -2475,9 +2859,17 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 height
             };
         } finally {
-            try { video.pause(); } catch { /* ignore */ }
+            try {
+                video.pause();
+            } catch {
+                /* ignore */
+            }
             video.removeAttribute("src");
-            try { video.load(); } catch { /* ignore */ }
+            try {
+                video.load();
+            } catch {
+                /* ignore */
+            }
             URL.revokeObjectURL(url);
         }
     }
@@ -2485,36 +2877,39 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     function seekVideo(video, time) {
         return new Promise((resolve, reject) => {
             let settled = false;
-            const finish = () => {
-                if (settled) return;
-                settled = true;
+            let timeout = 0;
+
+            const cleanup = () => {
                 clearTimeout(timeout);
-                video.removeEventListener("seeked", finish);
-                resolve();
+                video.removeEventListener("seeked", onSeeked);
             };
-            const timeout = setTimeout(() => {
+            const settle = (callback, value) => {
                 if (settled) return;
                 settled = true;
-                video.removeEventListener("seeked", finish);
-                reject(new Error(t("videoConvertTimeout")));
-            }, 7000);
+                cleanup();
+                callback(value);
+            };
+            const onSeeked = () => settle(resolve);
+
+            timeout = setTimeout(() => settle(() => reject(new Error(t("videoConvertTimeout")))), TIMINGS.videoSeek);
 
             if (Math.abs(video.currentTime - time) < 0.001 && video.readyState >= 2) {
-                requestAnimationFrame(finish);
+                requestAnimationFrame(onSeeked);
                 return;
             }
-            video.addEventListener("seeked", finish);
+
+            video.addEventListener("seeked", onSeeked);
             try {
                 video.currentTime = time;
             } catch (error) {
-                clearTimeout(timeout);
-                video.removeEventListener("seeked", finish);
-                reject(error);
+                settle(() => reject(error));
             }
         });
     }
 
     function encodeFrames(frames, width, height) {
+        if (!frames?.length) throw new Error(t("noFrames"));
+        if (!width || !height) throw new Error(t("conversionFailedGeneric"));
         const encoder = Gifenc.GIFEncoder();
         for (const frame of frames) {
             const palette = Gifenc.quantize(frame.data, 256);
@@ -2530,11 +2925,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return new Blob([encoder.bytes()], { type: "image/gif" });
     }
 
-    function injectStyle() {
-        if (document.getElementById("vc-picker-import-style")) return;
-        const style = document.createElement("style");
-        style.id = "vc-picker-import-style";
-        style.textContent = `
+    // Styles for the import UI, injected once next to the resize styles.
+    const IMPORT_CSS = `
 .vc-gif-import {
     position: absolute;
     top: 16px;
@@ -2874,27 +3266,120 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     color: var(--text-feedback-critical);
 }
 `;
-        (document.head || document.documentElement).appendChild(style);
+
+    function ensureImportStyle() {
+        injectStyle(IMPORT_STYLE_ID, IMPORT_CSS);
     }
 
-    function start() {
+    function start(attempt = 0) {
         if (!document.documentElement) {
-            setTimeout(start, 50);
+            if (attempt < ATTEMPTS.startRetry) {
+                setTimeout(() => start(attempt + 1), TIMINGS.startRetry);
+            } else {
+                console.error(`${LOG_PREFIX} document.documentElement never appeared`);
+            }
             return;
         }
-        injectStyle();
+        ensureImportStyle();
         window.addEventListener("resize", scheduleMaintain, { passive: true });
-        document.addEventListener("click", event => {
-            const tile = event.target.closest?.('.result__2dc39[role="button"]');
-            if (!tile) return;
-            if (event.target.closest?.('[class*="favButton"]')) return;
-            if (!document.querySelector('[class*="favoritesHeader"]')) return;
-            focusComposerWhenReady();
-        }, true);
-        setInterval(maintain, 250);
-        maintain();
+        document.addEventListener(
+            "click",
+            (event) => {
+                const tile = event.target.closest?.(`.${SELECTORS.rootCardClass}[role="button"]`);
+                if (!tile) return;
+                if (event.target.closest?.('[class*="favButton"]')) return;
+                if (!hasFavoritesView(document)) return;
+                focusComposerWhenReady();
+            },
+            true
+        );
+        setInterval(safeMaintain, TIMINGS.maintain);
+        safeMaintain();
         loadImports();
     }
 
+    if (TEST_HOOK) {
+        Object.assign(TEST_HOOK, {
+            resize: {
+                constants: {
+                    MIN_WIDTH,
+                    MIN_HEIGHT,
+                    MAX_HEIGHT,
+                    TOP_MARGIN,
+                    HANDLE_CLASS,
+                    STYLE_ID,
+                    VARS_STYLE_ID,
+                    HEIGHT_VAR
+                },
+                clamp,
+                round,
+                loadSavedHeight,
+                saveHeight,
+                setDiscordWidth,
+                applySavedHeight,
+                initDrawer,
+                markGifMedia,
+                markGifMediaIn,
+                getSavedHeight: () => savedHeight
+            },
+            imports: {
+                constants: {
+                    DB_NAME,
+                    DB_VERSION,
+                    STORE,
+                    MAX_INPUT_BYTES,
+                    MAX_OUTPUT_BYTES,
+                    MAX_DIMENSION,
+                    MAX_DURATION,
+                    FPS,
+                    MAX_VIDEO_FRAMES,
+                    MAX_IMAGE_FRAMES,
+                    ACCEPT,
+                    LAST_VIEW_COOKIE,
+                    GRID_GAP,
+                    DESIRED_TILE_WIDTH,
+                    MAX_COLUMNS,
+                    MAX_ROOT_COLUMNS,
+                    ROOT_TILE_HEIGHT
+                },
+                fit,
+                normalizeLocale,
+                detectDiscordLocale,
+                getLocale,
+                interpolate,
+                t,
+                normalizeLastView,
+                loadLastView,
+                saveLastView,
+                getNativeFavoriteEntries,
+                getImportedNativeMatches,
+                getFavoriteKeysForRecord,
+                getUnfavoriteAction,
+                closePicker,
+                reflowRootGrid,
+                renderImportedView,
+                layoutImportedTiles,
+                seekVideo,
+                encodeFrames,
+                importFile,
+                setImports(value) {
+                    imports = value;
+                },
+                getImports: () => imports,
+                setOverlay(value) {
+                    overlay = value;
+                },
+                getOverlay: () => overlay,
+                setDrawer(value) {
+                    drawer = value;
+                }
+            }
+        });
+        return;
+    }
+
+    if (!startPickerObserver()) {
+        document.addEventListener("DOMContentLoaded", startPickerObserver, { once: true });
+    }
     start();
 })();

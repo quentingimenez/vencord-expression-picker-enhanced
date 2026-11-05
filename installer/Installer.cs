@@ -12,8 +12,8 @@ using Microsoft.Win32;
 [assembly: AssemblyDescription("Installer and uninstaller for Vencord Expression Picker Enhanced")]
 [assembly: AssemblyProduct("Vencord Expression Picker Enhanced")]
 [assembly: AssemblyCompany("quentingimenez")]
-[assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyVersion("1.7.0.0")]
+[assembly: AssemblyFileVersion("1.7.0.0")]
 
 namespace VencordExpressionPickerEnhanced.Setup
 {
@@ -45,8 +45,16 @@ namespace VencordExpressionPickerEnhanced.Setup
     internal static class Installer
     {
         public const string AppName = "Vencord Expression Picker Enhanced";
-        public const string AppVersion = "1.6.0";
         public const string RepositoryUrl = "https://github.com/quentingimenez/vencord-expression-picker-enhanced";
+
+        public static string AppVersion
+        {
+            get
+            {
+                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                return version == null ? "0.0.0" : version.ToString(3);
+            }
+        }
         private const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\VencordExpressionPickerEnhanced";
         private const string InstallFolderName = "VencordPickerResize";
 
@@ -137,12 +145,12 @@ namespace VencordExpressionPickerEnhanced.Setup
                 temp = ExtractPayload();
                 Log(log, "Uninstalling " + AppName + "...");
                 int exitCode = RunPowerShell(Path.Combine(temp, "uninstall.ps1"), temp, log);
-                RemoveUninstallEntry();
                 if (exitCode != 0)
                 {
                     Log(log, "Uninstall failed (exit code " + exitCode + ").");
                     return 1;
                 }
+                RemoveUninstallEntry();
                 Log(log, "Uninstall complete.");
                 Log(log, "Restart Discord to finish.");
                 return 0;
@@ -234,7 +242,8 @@ namespace VencordExpressionPickerEnhanced.Setup
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-                process.WaitForExit();
+                // The parameterless overload also waits for the asynchronous
+                // stdout/stderr handlers to flush before returning.
                 process.WaitForExit();
                 return process.ExitCode;
             }

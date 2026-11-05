@@ -28,12 +28,18 @@ function Resolve-Source([string]$name) {
     throw "Missing $name (looked in src\ and the installer folder)."
 }
 
-function Copy-IfDifferent([string]$source, [string]$destination) {
+function Copy-FileIfChanged([string]$source, [string]$destination) {
     $src = [System.IO.Path]::GetFullPath($source)
     $dst = [System.IO.Path]::GetFullPath($destination)
-    if ($src -ne $dst) {
-        Copy-Item $src $dst -Force
+    if ($src -eq $dst) { return }
+
+    if (Test-Path $dst) {
+        $sourceHash = (Get-FileHash $src -Algorithm SHA256).Hash
+        $destinationHash = (Get-FileHash $dst -Algorithm SHA256).Hash
+        if ($sourceHash -eq $destinationHash) { return }
     }
+
+    Copy-Item $src $dst -Force
 }
 
 Write-Host "Vencord Expression Picker Enhanced - installer" -ForegroundColor Cyan
@@ -51,15 +57,18 @@ if (Get-Process Discord -ErrorAction SilentlyContinue) {
 }
 
 New-Item -ItemType Directory -Force -Path $installDir | Out-Null
-Copy-IfDifferent $sourceScript $installedScript
-Copy-IfDifferent $sourceWatcher $installedWatcher
-Copy-IfDifferent $sourceUninstaller $installedUninstaller
+Copy-FileIfChanged $sourceScript $installedScript
+Copy-FileIfChanged $sourceWatcher $installedWatcher
+Copy-FileIfChanged $sourceUninstaller $installedUninstaller
 
 # Keep a self-contained installer in the install folder so the watcher can
 # re-apply the loader after Vencord updates.
-$currentInstaller = $MyInvocation.MyCommand.Path
+$currentInstaller = $PSCommandPath
+if (-not $currentInstaller) {
+    $currentInstaller = $MyInvocation.MyCommand.Path
+}
 if ($currentInstaller) {
-    Copy-IfDifferent $currentInstaller $installerPath
+    Copy-FileIfChanged $currentInstaller $installerPath
 }
 
 # Stop an existing watcher (unless this installer was called by the watcher itself).
@@ -77,6 +86,7 @@ if (-not $content.Contains("VC_PICKER_RESIZE_LOADER_START")) {
     Copy-Item $preloadPath $backupPath -Force
 }
 
+# Keep this removal pattern in sync with uninstall.ps1 (covered by tests).
 $pattern = '(?s)\r?\n?/\* VC_PICKER_RESIZE_LOADER_START \*/.*?/\* VC_PICKER_RESIZE_LOADER_END \*/'
 $content = [System.Text.RegularExpressions.Regex]::Replace($content, $pattern, "")
 
@@ -98,9 +108,15 @@ try {
         const __vcPickerSettingsFile = __vcPickerPath.join(__dirname, "..", "settings", "settings.json");
         let __vcPickerHeight = null;
 
+        // Keep these bounds in sync with src/picker-resize.js.
+        const __vcPickerMinHeight = 320;
+        const __vcPickerMaxHeight = 5000;
+
         try {
             const __vcPickerSize = JSON.parse(__vcPickerFs.readFileSync(__vcPickerSizeFile, "utf8"));
-            if (Number.isFinite(__vcPickerSize.height) && __vcPickerSize.height >= 320) {
+            if (Number.isFinite(__vcPickerSize.height)
+                && __vcPickerSize.height >= __vcPickerMinHeight
+                && __vcPickerSize.height <= __vcPickerMaxHeight) {
                 __vcPickerHeight = Math.round(__vcPickerSize.height);
             }
         } catch { }
@@ -109,7 +125,10 @@ try {
             try {
                 const __vcPickerSettings = JSON.parse(__vcPickerFs.readFileSync(__vcPickerSettingsFile, "utf8"));
                 const __vcPickerLegacy = __vcPickerSettings.vcExpressionPickerSize;
-                if (__vcPickerLegacy && Number.isFinite(__vcPickerLegacy.height) && __vcPickerLegacy.height >= 320) {
+                if (__vcPickerLegacy
+                    && Number.isFinite(__vcPickerLegacy.height)
+                    && __vcPickerLegacy.height >= __vcPickerMinHeight
+                    && __vcPickerLegacy.height <= __vcPickerMaxHeight) {
                     __vcPickerHeight = Math.round(__vcPickerLegacy.height);
                 }
             } catch { }
@@ -120,7 +139,9 @@ try {
             savedHeight: __vcPickerHeight,
             saveHeight(height) {
                 try {
-                    if (!Number.isFinite(height) || height < 320 || height > 5000) return;
+                    if (!Number.isFinite(height)
+                        || height < __vcPickerMinHeight
+                        || height > __vcPickerMaxHeight) return;
                     __vcPickerFs.mkdirSync(__vcPickerRoot, { recursive: true });
                     __vcPickerFs.writeFileSync(
                         __vcPickerSizeFile,

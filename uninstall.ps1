@@ -20,6 +20,7 @@ Remove-Item $startupFile -Force -ErrorAction SilentlyContinue
 
 # Restore preload.js from the backup, or remove the loader block.
 if (Test-Path $preloadPath) {
+    # Keep this removal pattern in sync with install.ps1 (covered by tests).
     $pattern = '(?s)\r?\n?/\* VC_PICKER_RESIZE_LOADER_START \*/.*?/\* VC_PICKER_RESIZE_LOADER_END \*/'
     $backupPath = "$preloadPath.bak-picker-resize"
     $restored = $false

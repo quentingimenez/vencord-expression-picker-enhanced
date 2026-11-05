@@ -16,6 +16,19 @@ $dist = Join-Path $root "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 $output = Join-Path $dist "VencordExpressionPickerEnhanced-Setup.exe"
 
+$resources = @(
+    (Join-Path $root "install.ps1"),
+    (Join-Path $root "uninstall.ps1"),
+    (Join-Path $root "src\picker-resize.js"),
+    (Join-Path $root "src\watcher.ps1"),
+    (Join-Path $root "assets\app.ico")
+)
+foreach ($resource in $resources) {
+    if (-not (Test-Path $resource)) {
+        throw "Missing build resource: $resource"
+    }
+}
+
 & $compiler `
     /nologo /codepage:65001 /target:winexe /platform:anycpu /optimize+ `
     /out:"$output" `
