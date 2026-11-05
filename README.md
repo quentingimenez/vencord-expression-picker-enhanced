@@ -14,6 +14,11 @@ One-click installer, no Vencord build required.
   (width is stored by Discord, height in `size.json`).
 - No more blue flash: GIF tiles stay dark until their first frame is
   ready, then fade in.
+- **Import local files** with the upload button in the top-right corner of
+  the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV and
+  MKV are accepted and converted to GIF automatically.
+- Imported GIFs appear in an **Imported** strip inside the Favorites tab.
+  Click one to attach it to the message box.
 - Survives Discord updates.
 - Survives Vencord updates thanks to a small watcher that re-applies the
   loader when `preload.js` is replaced.
@@ -52,6 +57,25 @@ available in the **top-left corner** of the panel:
 Discord's native width-only handle on the left edge is hidden; the custom
 grip handles both dimensions.
 
+### Importing local GIFs
+
+1. Open the GIF picker.
+2. Click the **upload icon** in the top-right corner of the GIF page.
+3. Select one or more files. Accepted formats: GIF, PNG, JPEG, WebP, AVIF,
+   APNG, BMP, MP4, WebM, MOV and MKV.
+4. Images and videos are converted to GIF automatically (max 480 px,
+   6 seconds, 10 fps, 8 MB output).
+5. Open the **Favorites** tab. Imported GIFs are shown in the **Imported**
+   strip. Click one to attach it to the message box, then press Enter to
+   send it.
+
+Imported GIFs are stored **locally** in this Discord installation
+(IndexedDB). They are not synced to other devices, and they are sent as
+normal file attachments rather than provider GIF links. Use the small ×
+button on a thumbnail to remove it.
+
+Limits: input files up to 100 MB; converted GIFs up to 8 MB.
+
 ## Uninstall
 
 Double-click **`uninstall.cmd`**, then restart Discord.
@@ -79,7 +103,9 @@ The installer:
 4. starts the watcher, which keeps the loader in place after updates.
 
 The script and saved height live outside Vencord, so reinstalling Vencord
-does not remove them. No network access, no telemetry.
+does not remove them. Imported GIFs are stored in Discord's IndexedDB
+(local to this installation). Conversion runs entirely in the renderer
+using the bundled `gifenc` encoder; no network access, no telemetry.
 
 ## Troubleshooting
 
@@ -104,3 +130,6 @@ Unofficial project, not affiliated with Discord or Vencord. Modifying
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+The bundled GIF encoder is [gifenc](https://github.com/mattdesl/gifenc),
+also MIT — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

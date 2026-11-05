@@ -62,6 +62,11 @@
     <text x="379" y="118" fill="#b5bac1">Emoji</text>
   </g>
 
+  <!-- import button, top-right of the GIF page -->
+  <g transform="translate(936 104)" stroke="#b5bac1" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+    <path d="M8 12V2M8 2 5 5M8 2l3 3M2 12v3h12v-3"/>
+  </g>
+
   <!-- search -->
   <g>
     <rect x="250" y="144" width="700" height="38" rx="6" fill="#1e1f22" stroke="#3f4147" stroke-width="1"/>
