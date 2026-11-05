@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# Vencord Expression Picker Resize - uninstaller
+# Vencord Expression Picker Enhanced - uninstaller
 $ErrorActionPreference = "Stop"
 
 $vencordRoot = Join-Path $env:APPDATA "Vencord"
@@ -8,7 +8,7 @@ $installDir = Join-Path $env:LOCALAPPDATA "VencordPickerResize"
 $installedWatcher = Join-Path $installDir "watcher.ps1"
 $startupFile = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup\VencordPickerResize.vbs"
 
-Write-Host "Vencord Expression Picker Resize - uninstaller" -ForegroundColor Cyan
+Write-Host "Vencord Expression Picker Enhanced - uninstaller" -ForegroundColor Cyan
 
 # Stop the watcher if it is running.
 Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |

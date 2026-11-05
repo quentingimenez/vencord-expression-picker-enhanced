@@ -1,7 +1,11 @@
-# Vencord Expression Picker Resize
+# Vencord Expression Picker Enhanced
 
-**A larger, resizable and persistent GIF / emoji picker for Vencord on Windows.**
+**A larger, resizable and persistent GIF / emoji picker for Vencord on Windows,
+with local GIF import, favorites management, search and automatic localization.**
 One-click installer, no Vencord build required.
+
+> Renamed from **Vencord Expression Picker Resize**. Existing installs and
+> imported GIFs keep working; the internal storage paths are unchanged.
 
 ![Preview](assets/preview.svg)
 
@@ -49,7 +53,7 @@ Vencord update. No Vencord build is required.
 ## Installation
 
 1. Download the latest release:
-   <https://github.com/quentingimenez/vencord-expression-picker-resize/releases/latest>
+   <https://github.com/quentingimenez/vencord-expression-picker-enhanced/releases/latest>
 2. Extract the ZIP.
 3. Close Discord (recommended).
 4. Double-click **`install.cmd`**.

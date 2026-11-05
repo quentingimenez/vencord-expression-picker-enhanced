@@ -1,4 +1,4 @@
-# Keeps the expression picker resize loader present even after Vencord updates.
+# Keeps the enhanced expression picker loader present even after Vencord updates.
 # Started hidden at logon by VencordPickerResize.vbs.
 $ErrorActionPreference = "SilentlyContinue"
 

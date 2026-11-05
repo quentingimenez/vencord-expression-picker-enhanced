@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# Vencord Expression Picker Resize - installer
+# Vencord Expression Picker Enhanced - installer
 # Installs a small renderer script + a watcher that keeps it alive after Vencord updates.
 param(
     [switch]$FromWatcher
@@ -35,7 +35,7 @@ function Copy-IfDifferent([string]$source, [string]$destination) {
     }
 }
 
-Write-Host "Vencord Expression Picker Resize - installer" -ForegroundColor Cyan
+Write-Host "Vencord Expression Picker Enhanced - installer" -ForegroundColor Cyan
 
 if (-not (Test-Path $preloadPath)) {
     throw "Vencord was not found at:`n  $preloadPath`nInstall Vencord desktop first (official installer)."

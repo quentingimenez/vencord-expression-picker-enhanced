@@ -5,7 +5,7 @@ var Gifenc=(()=>{var Q=Object.defineProperty;var st=Object.getOwnPropertyDescrip
 
 
 /*
- * Vencord - Expression Picker Resize
+ * Vencord - Expression Picker Enhanced
  *
  * Adds a top-left resize handle to Discord's expression picker
  * (GIF / stickers / emoji) and remembers its height.
@@ -458,7 +458,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 })();
 
 /*
- * Vencord Expression Picker Resize - local GIF imports
+ * Vencord Expression Picker Enhanced - local GIF imports
  * Adds an import button to the GIF page, converts files to GIF and
  * shows them in a dedicated "Importés" category of the GIF picker.
  */
