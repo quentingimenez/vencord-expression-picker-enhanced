@@ -17,8 +17,9 @@ One-click installer, no Vencord build required.
 - **Import local files** with the upload button in the top-right corner of
   the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV and
   MKV are accepted and converted to GIF automatically.
-- Imported GIFs appear in an **Imported** strip inside the Favorites tab.
-  Click one to attach it to the message box.
+- Imported GIFs appear in a dedicated **Importés** category in the GIF
+  picker, with the same masonry layout as native Favorites. Click one to
+  attach it to the message box.
 - Survives Discord updates.
 - Survives Vencord updates thanks to a small watcher that re-applies the
   loader when `preload.js` is replaced.
@@ -65,21 +66,19 @@ grip handles both dimensions.
    APNG, BMP, MP4, WebM, MOV and MKV.
 4. Images and videos are converted to GIF automatically (max 480 px,
    6 seconds, 10 fps, 8 MB output).
-5. Open the **Favorites** tab. Imported GIFs are shown in the **Imported**
-   strip. Click one to attach it to the message box; the picker closes
+5. Open the **Importés** category in the GIF picker. The first tile has the
+   same function as the top-right upload button, so you can import more
+   files from there. Imported GIFs use the same masonry sizing as native
+   Favorites. Click one to attach it to the message box; the picker closes
    automatically. Press Enter to send it.
 
 Imported GIFs are stored **locally** in this Discord installation
 (IndexedDB). They are not synced to other devices, and they are sent as
-normal file attachments rather than provider GIF links. Use the small ×
-button on a thumbnail to remove it.
+normal file attachments rather than provider GIF links. They stay visible
+in **Importés** even if you also save them in Discord's native favorites,
+so use the × button on a thumbnail to delete the local import in one click.
 
 Limits: input files up to 100 MB; converted GIFs up to 8 MB.
-
-If a sent imported GIF is also added to Discord's **native** favorites (for
-example by favoriting the message attachment), the matching local tile is
-hidden automatically to avoid a duplicate. It reappears if the native
-favorite is removed.
 
 ## Uninstall
 

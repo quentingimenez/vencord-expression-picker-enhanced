@@ -460,7 +460,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 /*
  * Vencord Expression Picker Resize - local GIF imports
  * Adds an import button to the GIF page, converts files to GIF and
- * shows them in a local "Imported" section of the Favorites tab.
+ * shows them in a dedicated "Importés" category of the GIF picker.
  */
 (() => {
     "use strict";
@@ -505,13 +505,32 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     let drawer = null;
     let button = null;
     let input = null;
-    let section = null;
-    let list = null;
     let statusEl = null;
     let statusTimer = 0;
     let busy = false;
-    let renderedKey = "";
-    let nativeFavoriteCache = { at: 0, names: new Set(), sizes: new Map() };
+
+    let categoryCard = null;
+    let categoryPreviewId = "";
+    let importedView = false;
+    let overlay = null;
+    let overlayKey = "";
+    let overlayLayoutWidth = 0;
+
+    const GRID_GAP = 12;
+    const DESIRED_TILE_WIDTH = 200;
+    const MAX_COLUMNS = 8;
+
+    const BACK_ICON = `
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
+            <path fill="currentColor" d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z"/>
+        </svg>`;
+
+    const UPLOAD_ICON = `
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+            <path d="M12 16V4m0 0L8 8m4-4 4 4M5 15v4h14v-4"
+                stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
 
     function openDB() {
         if (!dbPromise) {
@@ -568,8 +587,48 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         return document.getElementById("gif-picker-tab-panel");
     }
 
-    function isFavoritesView(panel) {
-        return !!panel?.querySelector('[class*="favoritesHeader"]');
+    function findRootGrid(panel) {
+        const cards = panel?.querySelectorAll('.content_fed6d3 .result__2dc39[role="button"]');
+        if (!cards || cards.length === 0) return null;
+        const favoritesCard = cards[0];
+        if (favoritesCard.getAttribute("aria-label") !== "Favoris") return null;
+        const wrapper = favoritesCard.parentElement;
+        if (!wrapper) return null;
+        return { favoritesCard, wrapper };
+    }
+
+    function isRootGifView(panel) {
+        if (!panel || panel.querySelector(".backButton_fed6d3")) return false;
+        const search = panel.querySelector('input[role="searchbox"]');
+        if (search && search.value.trim()) return false;
+        return !!findRootGrid(panel);
+    }
+
+    function reflowRootGrid(wrapper) {
+        const cards = [...wrapper.children].filter(child =>
+            child.classList?.contains("result__2dc39") && child.style.position === "absolute"
+        );
+        if (cards.length === 0) return;
+
+        const first = cards[0];
+        const width = parseFloat(first.style.width) || 186.5;
+        const height = parseFloat(first.style.height) || 110;
+        const left = parseFloat(first.style.left) || GRID_GAP;
+        const wrapperWidth = wrapper.clientWidth || wrapper.parentElement?.clientWidth || 806;
+        const columns = Math.max(1, Math.floor((wrapperWidth - left * 2 + GRID_GAP) / (width + GRID_GAP)));
+
+        for (let index = 0; index < cards.length; index++) {
+            const card = cards[index];
+            card.style.left = `${left + (index % columns) * (width + GRID_GAP)}px`;
+            card.style.top = `${Math.floor(index / columns) * (height + GRID_GAP)}px`;
+            card.style.width = `${width}px`;
+            card.style.height = `${height}px`;
+        }
+
+        const rows = Math.ceil(cards.length / columns);
+        const needed = rows * (height + GRID_GAP) - GRID_GAP;
+        const current = parseFloat(wrapper.style.height) || 0;
+        if (current < needed) wrapper.style.height = `${needed}px`;
     }
 
     function ensureInput() {
@@ -635,118 +694,165 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         }
     }
 
-    function ensureSection(panel) {
-        if (section?.isConnected) return section;
+    function createCategoryCard() {
+        const card = document.createElement("div");
+        card.className = "result__2dc39 vc-imported-category";
+        card.style.position = "absolute";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", "Importés");
+        card.innerHTML = `
+            <img class="vc-imported-category-preview" alt="" draggable="false">
+            <div class="vc-imported-category-fade"></div>
+            <div class="categoryText_d02962 vc-imported-category-text">
+                ${UPLOAD_ICON}
+                <span class="categoryName_d02962">Importés</span>
+            </div>
+            <span class="vc-imported-category-count"></span>`;
 
-        section = document.createElement("div");
-        section.className = "vc-local-gifs";
-        section.innerHTML = `
-            <div class="vc-local-gifs-title"><span>Importés</span></div>
-            <div class="vc-local-gifs-list"></div>`;
-        list = section.querySelector(".vc-local-gifs-list");
-
-        const header = panel.querySelector(":scope > [class*=\"header_\"]");
-        if (header) header.after(section);
-        else panel.prepend(section);
-        return section;
+        const open = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            openImportedView();
+        };
+        card.addEventListener("click", open);
+        card.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") open(event);
+        });
+        return card;
     }
 
-    function getNativeFavoriteCache() {
-        const now = Date.now();
-        if (now - nativeFavoriteCache.at < 1500) return nativeFavoriteCache;
+    function updateCategoryCardContent() {
+        if (!categoryCard?.isConnected) return;
 
-        const names = new Set();
-        const sizes = new Map();
-
-        try {
-            const gifs = window.Vencord?.Webpack?.Common?.UserSettingsProtoStore
-                ?.frecencyWithoutFetchingLatest?.favoriteGifs?.gifs;
-
-            if (gifs) {
-                for (const gif of Object.values(gifs)) {
-                    for (const url of [gif.url, gif.src, gif.gifSrc]) {
-                        if (!url) continue;
-                        try {
-                            const parsed = new URL(url, location.href);
-                            const name = decodeURIComponent(parsed.pathname.split("/").pop() || "").toLowerCase();
-                            if (!name) continue;
-                            names.add(name);
-                            if (gif.width && gif.height) {
-                                const list = sizes.get(name) || [];
-                                if (!list.some(size => size.width === gif.width && size.height === gif.height)) {
-                                    list.push({ width: gif.width, height: gif.height });
-                                    sizes.set(name, list);
-                                }
-                            }
-                        } catch { /* ignore */ }
-                    }
-                }
+        const latest = imports[0] ?? null;
+        const preview = categoryCard.querySelector(".vc-imported-category-preview");
+        if (latest) {
+            if (categoryPreviewId !== latest.id) {
+                categoryPreviewId = latest.id;
+                preview.src = objectUrls.get(latest.id) || "";
             }
-        } catch { /* ignore */ }
+            preview.style.display = "block";
+        } else {
+            categoryPreviewId = "";
+            preview.removeAttribute("src");
+            preview.style.display = "none";
+        }
 
-        nativeFavoriteCache = { at: now, names, sizes };
-        return nativeFavoriteCache;
+        const count = categoryCard.querySelector(".vc-imported-category-count");
+        count.textContent = imports.length > 0 ? String(imports.length) : "";
+        count.style.display = imports.length > 0 ? "flex" : "none";
     }
 
-    function isNativeDuplicate(record, cache = getNativeFavoriteCache()) {
-        const name = record.name.toLowerCase();
-        if (!cache.names.has(name)) return false;
-
-        const sizes = cache.sizes.get(name);
-        if (!sizes || sizes.length === 0) return true;
-        if (!record.width || !record.height) return true;
-
-        return sizes.some(size =>
-            Math.abs(size.width - record.width) <= 2 &&
-            Math.abs(size.height - record.height) <= 2
-        );
+    function removeCategoryCard() {
+        if (!categoryCard) return;
+        const wrapper = categoryCard.parentElement;
+        categoryCard.remove();
+        categoryCard = null;
+        categoryPreviewId = "";
+        if (wrapper) {
+            const first = wrapper.firstElementChild;
+            const cards = [...wrapper.children].filter(child => child.classList?.contains("result__2dc39"));
+            const firstHeight = parseFloat(first?.style.height) || 0;
+            const uniform = cards.every(card => Math.abs((parseFloat(card.style.height) || 0) - firstHeight) < 0.5);
+            if (first?.getAttribute("aria-label") === "Favoris" && uniform) reflowRootGrid(wrapper);
+        }
     }
 
-    function renderSection(force = false) {
-        const panel = findPanel();
-        if (!panel) {
-            section?.remove();
-            section = null;
-            list = null;
-            renderedKey = "";
+    function maintainCategoryCard(panel) {
+        if (!isRootGifView(panel)) {
+            removeCategoryCard();
             return;
         }
 
-        const nativeFavorites = getNativeFavoriteCache();
-        const visibleImports = imports.filter(record => !isNativeDuplicate(record, nativeFavorites));
-
-        if (!isFavoritesView(panel) || visibleImports.length === 0) {
-            section?.remove();
-            section = null;
-            list = null;
-            renderedKey = "";
+        const grid = findRootGrid(panel);
+        if (!grid) {
+            removeCategoryCard();
             return;
         }
 
-        const hadSection = !!section?.isConnected;
-        ensureSection(panel);
-        if (!section?.isConnected) return;
+        if (!categoryCard || !categoryCard.isConnected || categoryCard.parentElement !== grid.wrapper) {
+            categoryCard?.remove();
+            categoryCard = createCategoryCard();
+            grid.favoritesCard.after(categoryCard);
+        }
 
-        const header = panel.querySelector(":scope > [class*=\"header_\"]");
-        if (header && header.nextElementSibling !== section) header.after(section);
-        else if (!header && section.parentElement !== panel) panel.prepend(section);
+        updateCategoryCardContent();
+        reflowRootGrid(grid.wrapper);
+    }
 
-        const key = visibleImports.map(record => record.id).join("|");
-        if (!force && hadSection && key === renderedKey) return;
+    function createImportedView() {
+        const view = document.createElement("div");
+        view.className = "vc-imported-view";
+        view.innerHTML = `
+            <div class="vc-imported-header">
+                <div class="vc-imported-back" role="button" tabindex="0" aria-label="Retour">${BACK_ICON}</div>
+                <h3 class="vc-imported-title">Importés</h3>
+                <span class="vc-imported-count"></span>
+            </div>
+            <div class="vc-imported-scroll">
+                <div class="vc-imported-grid"></div>
+                <div class="vc-imported-empty">
+                    <span>Aucun GIF importé pour le moment</span>
+                </div>
+            </div>`;
 
-        renderedKey = key;
+        const back = view.querySelector(".vc-imported-back");
+        const close = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeImportedView();
+        };
+        back.addEventListener("click", close);
+        back.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") close(event);
+        });
+        return view;
+    }
 
-        const title = section.querySelector(".vc-local-gifs-title span");
-        if (title) title.textContent = `Importés (${visibleImports.length})`;
+    function renderImportedView(force = false) {
+        if (!overlay?.isConnected) return;
 
-        list.textContent = "";
-        for (const record of visibleImports) {
-            const item = document.createElement("div");
-            item.className = "vc-local-item";
+        const key = imports.map(record => record.id).join("|");
+        if (!force && key === overlayKey) return;
+        overlayKey = key;
+
+        const grid = overlay.querySelector(".vc-imported-grid");
+        const empty = overlay.querySelector(".vc-imported-empty");
+        const count = overlay.querySelector(".vc-imported-count");
+
+        count.textContent = imports.length === 0
+            ? ""
+            : `${imports.length} GIF${imports.length > 1 ? "s" : ""}`;
+        empty.style.display = imports.length === 0 ? "flex" : "none";
+        grid.style.display = "grid";
+        grid.textContent = "";
+
+        const addTile = document.createElement("button");
+        addTile.type = "button";
+        addTile.className = "vc-imported-tile vc-imported-add";
+        addTile.dataset.aspect = "1";
+        addTile.setAttribute("aria-label", "Importer des GIF");
+        addTile.innerHTML = `
+            <span class="vc-imported-add-icon">${UPLOAD_ICON}</span>
+            <span class="vc-imported-add-label">Importer</span>`;
+        addTile.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!busy) input?.click();
+        });
+        grid.appendChild(addTile);
+
+        for (const record of imports) {
+            const tile = document.createElement("div");
+            tile.className = "vc-imported-tile";
+            tile.dataset.aspect = record.width && record.height
+                ? String(record.height / record.width)
+                : "1";
 
             const attach = document.createElement("button");
             attach.type = "button";
-            attach.className = "vc-local-attach";
+            attach.className = "vc-imported-attach";
             attach.setAttribute("aria-label", `Ajouter ${record.name} au message`);
 
             const image = document.createElement("img");
@@ -763,7 +869,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
 
             const remove = document.createElement("button");
             remove.type = "button";
-            remove.className = "vc-local-delete";
+            remove.className = "vc-imported-delete";
             remove.setAttribute("aria-label", `Supprimer ${record.name}`);
             remove.textContent = "×";
             remove.addEventListener("click", event => {
@@ -772,9 +878,79 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
                 deleteRecord(record);
             });
 
-            item.append(attach, remove);
-            list.appendChild(item);
+            tile.append(attach, remove);
+            grid.appendChild(tile);
         }
+
+        layoutImportedTiles(true);
+    }
+
+    function layoutImportedTiles(force = false) {
+        if (!overlay?.isConnected) return;
+        const grid = overlay.querySelector(".vc-imported-grid");
+        const tiles = [...(grid?.children || [])];
+        if (!grid || tiles.length === 0) return;
+
+        const containerWidth = overlay.clientWidth;
+        if (!containerWidth) return;
+        if (!force && containerWidth === overlayLayoutWidth) return;
+        overlayLayoutWidth = containerWidth;
+
+        const columns = Math.min(Math.max(Math.floor(containerWidth / DESIRED_TILE_WIDTH), 1), MAX_COLUMNS);
+        const tileWidth = (containerWidth - GRID_GAP * 2 - (columns - 1) * GRID_GAP) / columns;
+        const heights = new Array(columns).fill(0);
+
+        for (const tile of tiles) {
+            let column = 0;
+            for (let index = 1; index < columns; index++) {
+                if (heights[index] < heights[column]) column = index;
+            }
+
+            const ratio = parseFloat(tile.dataset.aspect) || 1;
+            const height = Math.round(tileWidth * ratio * 1000) / 1000;
+            tile.style.position = "absolute";
+            tile.style.left = `${GRID_GAP + column * (tileWidth + GRID_GAP)}px`;
+            tile.style.top = `${heights[column]}px`;
+            tile.style.width = `${tileWidth}px`;
+            tile.style.height = `${height}px`;
+            heights[column] += height + GRID_GAP;
+        }
+
+        grid.style.width = `${containerWidth}px`;
+        grid.style.height = `${Math.max(...heights) - GRID_GAP}px`;
+    }
+
+    function openImportedView() {
+        const panel = findPanel();
+        if (!panel) return;
+        importedView = true;
+        maintainImportedView(panel);
+    }
+
+    function closeImportedView() {
+        importedView = false;
+        overlay?.remove();
+        overlay = null;
+        overlayKey = "";
+        overlayLayoutWidth = 0;
+    }
+
+    function maintainImportedView(panel) {
+        if (!importedView || !panel) {
+            closeImportedView();
+            return;
+        }
+
+        if (!overlay || !overlay.isConnected || overlay.parentElement !== panel) {
+            overlay?.remove();
+            overlay = createImportedView();
+            panel.appendChild(overlay);
+            overlayKey = "";
+            overlayLayoutWidth = 0;
+        }
+
+        renderImportedView(false);
+        layoutImportedTiles();
     }
 
     function maintain() {
@@ -785,16 +961,14 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
             drawer = currentDrawer;
             button = drawer?.querySelector(".vc-gif-import") ?? null;
             statusEl = drawer?.querySelector(".vc-import-status") ?? null;
-            section = drawer?.querySelector(".vc-local-gifs") ?? null;
-            list = section?.querySelector(".vc-local-gifs-list") ?? null;
         }
 
         if (!drawer?.isConnected) {
             drawer = null;
             button = null;
             statusEl = null;
-            section = null;
-            list = null;
+            closeImportedView();
+            removeCategoryCard();
             return;
         }
 
@@ -804,15 +978,15 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         btn.disabled = busy;
 
         if (!panel) {
-            section?.remove();
-            section = null;
-            list = null;
+            closeImportedView();
+            removeCategoryCard();
             statusEl?.remove();
             statusEl = null;
             return;
         }
 
-        renderSection();
+        maintainCategoryCard(panel);
+        maintainImportedView(panel);
     }
 
     async function loadImports() {
@@ -828,7 +1002,8 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         for (const record of imports) {
             objectUrls.set(record.id, URL.createObjectURL(record.blob));
         }
-        renderSection(true);
+        if (overlay) renderImportedView(true);
+        updateCategoryCardContent();
     }
 
     function closePicker() {
@@ -892,8 +1067,9 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         if (url) URL.revokeObjectURL(url);
         objectUrls.delete(record.id);
         imports = imports.filter(item => item.id !== record.id);
-        renderSection();
-        setStatus("GIF supprimé");
+        renderImportedView(true);
+        updateCategoryCardContent();
+        setStatus("GIF importé supprimé");
     }
 
     async function handleFiles(files) {
@@ -923,6 +1099,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         busy = false;
         if (button) button.disabled = false;
         if (added > 0) {
+            openImportedView();
             setStatus(`${added} GIF importé${added > 1 ? "s" : ""}`);
         } else if (failed > 0) {
             setStatus("Aucun GIF importé", true);
@@ -1214,79 +1391,213 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
     height: 16px;
     pointer-events: none;
 }
-.vc-local-gifs {
-    flex: 0 0 auto;
-    padding: 8px 12px 10px;
-    background: var(--background-base-lower);
-    border-bottom: 1px solid var(--border-subtle);
+.vc-imported-category {
+    position: absolute;
+    overflow: hidden;
+    background: linear-gradient(135deg, #5865f2 0%, #eb459e 100%);
 }
-.vc-local-gifs-title {
-    margin-bottom: 6px;
-    color: var(--text-muted);
-    font: 600 11px/14px var(--font-primary, sans-serif);
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+.vc-imported-category-preview {
+    position: absolute;
+    inset: 0;
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
-.vc-local-gifs-list {
+.vc-imported-category-fade {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background: rgba(88, 101, 242, 0.8);
+    pointer-events: none;
+}
+.vc-imported-category-text {
+    z-index: 2;
+}
+.vc-imported-category-count {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 2px;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font: 600 11px/1 var(--font-primary, sans-serif);
+    pointer-events: none;
 }
-.vc-local-item {
-    position: relative;
+.vc-imported-view {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    background: var(--background-base-low, var(--background-base-lower));
+    color: var(--text-default);
+}
+.vc-imported-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     flex: 0 0 auto;
-    width: 96px;
-    height: 72px;
+    min-height: 53px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    background: var(--background-base-lower);
 }
-.vc-local-attach {
+.vc-imported-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    color: var(--interactive-text-default);
+    cursor: pointer;
+}
+.vc-imported-back:hover {
+    color: var(--interactive-text-hover);
+    background: var(--background-mod-subtle);
+}
+.vc-imported-back svg {
+    width: 24px;
+    height: 24px;
+}
+.vc-imported-title {
+    margin: 0;
+    color: var(--text-strong, var(--text-default));
+    font: 600 16px/20px var(--font-primary, sans-serif);
+}
+.vc-imported-count {
+    color: var(--text-muted);
+    font: 500 12px/16px var(--font-primary, sans-serif);
+}
+.vc-imported-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px 0;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--background-surface-high) transparent;
+}
+.vc-imported-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.vc-imported-scroll::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: var(--background-surface-high);
+}
+.vc-imported-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.vc-imported-grid {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+.vc-imported-tile {
+    position: absolute;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--background-mod-subtle);
+}
+.vc-imported-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0;
+    border: 1px dashed var(--border-subtle);
+    background: var(--background-base-lower);
+    color: var(--text-muted);
+    cursor: pointer;
+    font: 500 13px/16px var(--font-primary, sans-serif);
+    transition: border-color 0.12s, background-color 0.12s, color 0.12s;
+}
+.vc-imported-add:hover {
+    border-color: var(--brand-500, #5865f2);
+    background: var(--background-mod-subtle);
+    color: var(--text-default);
+}
+.vc-imported-add:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+.vc-imported-add-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.vc-imported-add-icon svg {
+    width: 26px;
+    height: 26px;
+}
+.vc-imported-attach {
     display: block;
     width: 100%;
     height: 100%;
     padding: 0;
     border: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--background-mod-subtle);
+    background: transparent;
     cursor: pointer;
 }
-.vc-local-attach img {
+.vc-imported-attach img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-.vc-local-attach:hover {
+.vc-imported-attach:hover {
     outline: 2px solid var(--border-focus);
     outline-offset: -2px;
 }
-.vc-local-delete {
+.vc-imported-delete {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     padding: 0;
     border: 0;
     border-radius: 50%;
-    background: var(--background-surface-high);
-    color: var(--text-default);
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    opacity: 0;
-    transition: opacity 0.12s, background-color 0.12s;
-}
-.vc-local-item:hover .vc-local-delete {
-    opacity: 1;
-}
-.vc-local-delete:hover {
-    background: var(--status-danger);
+    background: rgba(0, 0, 0, 0.65);
     color: #fff;
+    cursor: pointer;
+    font: 600 16px/1 var(--font-primary, sans-serif);
+    transition: background-color 0.12s, transform 0.12s;
+}
+.vc-imported-delete:hover {
+    background: var(--status-danger);
+    transform: scale(1.06);
+}
+.vc-imported-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 100%;
+    min-height: 180px;
+    color: var(--text-muted);
+    text-align: center;
+    font: 500 14px/18px var(--font-primary, sans-serif);
+}
+.vc-imported-empty small {
+    font: 400 12px/16px var(--font-primary, sans-serif);
+    opacity: 0.8;
 }
 .vc-import-status {
     position: absolute;
