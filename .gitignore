@@ -1,0 +1,13 @@
+# Local/runtime files
+size.json
+watcher.log
+*.bak-picker-resize
+
+# Release archives
+*.zip
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
