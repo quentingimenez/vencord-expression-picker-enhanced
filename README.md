@@ -3,105 +3,104 @@
 **A larger, resizable and persistent GIF / emoji picker for Vencord on Windows.**
 One-click installer, no Vencord build required.
 
-![Aperçu](assets/preview.svg)
+![Preview](assets/preview.svg)
 
-## Fonctionnalités
+## Features
 
-- Sélecteur GIF / autocollants / émojis beaucoup plus grand par défaut.
-- Redimensionnement **largeur + hauteur** avec une petite poignée discrète
-  intégrée dans le coin haut-gauche.
-- Taille mémorisée entre les ouvertures et les redémarrages
-  (largeur via Discord, hauteur dans `size.json`).
-- Plus de flash bleu : les tuiles GIF restent sombres jusqu'au chargement de
-  la première image, puis apparaissent en fondu.
-- Reste en place après une mise à jour de Discord.
-- Reste en place après une mise à jour de Vencord grâce à un petit watcher.
+- Much larger GIF / sticker / emoji picker by default.
+- **Width + height** resizing with a small, discreet grip inside the
+  top-left corner.
+- Size remembered between openings and restarts
+  (width is stored by Discord, height in `size.json`).
+- No more blue flash: GIF tiles stay dark until their first frame is
+  ready, then fade in.
+- Survives Discord updates.
+- Survives Vencord updates thanks to a small watcher that re-applies the
+  loader when `preload.js` is replaced.
 
-## Pourquoi pas un plugin Vencord ?
+## Why not a Vencord plugin?
 
-L'installateur officiel de Vencord ne charge pas de plugins externes :
-les `userplugins` ne sont pris en charge que dans une build Vencord
-compilée depuis les sources. Pour un utilisateur normal, cela impliquerait
-Node.js, pnpm, git et une compilation complète.
+The official Vencord installer does not load external plugins. Vencord
+`userplugins` are only supported when Vencord is built from source, which
+requires Node.js, pnpm, git and a full build.
 
-Ce projet utilise donc une approche plus simple : un petit script injecté
-dans le renderer via `preload.js`, avec un watcher qui réapplique le hook
-après les mises à jour de Vencord. Aucune build Vencord n'est nécessaire.
+This project uses a simpler approach: a small renderer script injected
+through `preload.js`, plus a watcher that re-applies the hook after a
+Vencord update. No Vencord build is required.
 
 ## Installation
 
-1. Télécharge la dernière release :
+1. Download the latest release:
    <https://github.com/quentingimenez/vencord-expression-picker-resize/releases/latest>
-2. Extrais le ZIP.
-3. Ferme Discord (recommandé).
-4. Double-clique sur **`install.cmd`**.
-5. Relance Discord.
+2. Extract the ZIP.
+3. Close Discord (recommended).
+4. Double-click **`install.cmd`**.
+5. Restart Discord.
 
-> Windows 10/11, Discord desktop et Vencord installé avec l'installateur
-> officiel. Vesktop et BetterDiscord ne sont pas pris en charge.
+> Windows 10/11, Discord desktop and Vencord installed with the official
+> installer. Vesktop and BetterDiscord are not supported.
 
-## Utilisation
+## Usage
 
-Ouvre le sélecteur GIF depuis la barre de message. Une petite poignée
-diagonale se trouve dans le coin **haut-gauche** du panneau :
+Open the GIF picker from the message bar. A small diagonal grip is
+available in the **top-left corner** of the panel:
 
-- glisse vers le haut/gauche pour agrandir ;
-- glisse vers le bas/droite pour réduire ;
-- la taille est mémorisée automatiquement.
+- drag it up/left to enlarge the picker;
+- drag it down/right to shrink it;
+- the size is remembered automatically.
 
-La poignée native de largeur sur le bord gauche est masquée ; la poignée
-personnalisée gère les deux dimensions.
+Discord's native width-only handle on the left edge is hidden; the custom
+grip handles both dimensions.
 
-## Désinstallation
+## Uninstall
 
-Double-clique sur **`uninstall.cmd`**, puis relance Discord.
+Double-click **`uninstall.cmd`**, then restart Discord.
 
-L'installateur crée une sauvegarde de `preload.js` dans
-`preload.js.bak-picker-resize` et la restaure lors de la désinstallation.
+The installer keeps a backup of `preload.js` at
+`preload.js.bak-picker-resize` and restores it during uninstallation.
 
-## Mises à jour
+## Updates
 
-- **Discord** : Vencord repatche automatiquement le nouvel app.asar ;
-  aucune action nécessaire.
-- **Vencord** : le watcher surveille `%APPDATA%\Vencord\dist\preload.js` et
-  réapplique le loader automatiquement. Si la poignée disparaît après une
-  mise à jour, relance `install.cmd` puis redémarre Discord.
+- **Discord updates**: Vencord automatically re-patches the new `app.asar`;
+  no action is required.
+- **Vencord updates**: the watcher monitors
+  `%APPDATA%\Vencord\dist\preload.js` and re-applies the loader
+  automatically. If the grip ever disappears after an update, run
+  `install.cmd` again and restart Discord.
 
-## Comment ça marche
+## How it works
 
-L'installateur :
+The installer:
 
-1. copie `picker-resize.js` et `watcher.ps1` dans
-   `%LOCALAPPDATA%\VencordPickerResize\` ;
-2. ajoute un loader à `%APPDATA%\Vencord\dist\preload.js` ;
-3. crée `VencordPickerResize.vbs` dans le dossier Démarrage ;
-4. lance le watcher, qui maintient le loader après les mises à jour.
+1. copies `picker-resize.js` and `watcher.ps1` to
+   `%LOCALAPPDATA%\VencordPickerResize\`;
+2. appends a loader to `%APPDATA%\Vencord\dist\preload.js`;
+3. creates `VencordPickerResize.vbs` in the Startup folder;
+4. starts the watcher, which keeps the loader in place after updates.
 
-Le script et la taille sont stockés en dehors de Vencord, donc une
-réinstallation de Vencord ne les supprime pas. Aucun réseau, aucune
-télémétrie.
+The script and saved height live outside Vencord, so reinstalling Vencord
+does not remove them. No network access, no telemetry.
 
-## Dépannage
+## Troubleshooting
 
-- **« Vencord was not found »** : Vencord n'est pas installé au chemin
-  standard, ou tu utilises Vesktop. Ce projet cible l'installateur officiel.
-- **Rien ne se passe après le redémarrage** : relance `install.cmd`, puis
-  redémarre Discord. Vérifie que
-  `%APPDATA%\Vencord\dist\preload.js` contient
+- **"Vencord was not found"**: Vencord is not installed at the standard
+  path, or you are using Vesktop. This project targets the official
+  Vencord installer.
+- **Nothing happens after restarting**: run `install.cmd` again, then
+  restart Discord. Check that
+  `%APPDATA%\Vencord\dist\preload.js` contains
   `VC_PICKER_RESIZE_LOADER_START`.
-- **La poignée a disparu après une mise à jour** : le watcher n'était
-  probablement pas lancé. Relance `install.cmd`.
-- **Antivirus / PowerShell** : les scripts sont lisibles et ne font que
-  copier des fichiers locaux et modifier `preload.js`. `install.cmd` lance
-  PowerShell avec `-ExecutionPolicy Bypass` pour éviter le blocage des
-  scripts non signés.
+- **The grip disappeared after an update**: the watcher was probably not
+  running. Run `install.cmd` again.
+- **Antivirus / PowerShell**: the scripts are readable and only copy local
+  files and modify `preload.js`. `install.cmd` starts PowerShell with
+  `-ExecutionPolicy Bypass` to allow unsigned scripts.
 
-## Avertissement
+## Disclaimer
 
-Projet non officiel, non affilié à Discord ni à Vencord. Modifier
-`preload.js` peut casser après une mise à jour incompatible. Utilise-le à
-tes propres risques.
+Unofficial project, not affiliated with Discord or Vencord. Modifying
+`preload.js` can break after an incompatible update. Use at your own risk.
 
-## Licence
+## License
 
-MIT — voir [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
