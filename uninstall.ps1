@@ -44,6 +44,10 @@ if (Test-Path $preloadPath) {
 # Remove the local script, watcher and saved size.
 Remove-Item $installDir -Recurse -Force -ErrorAction SilentlyContinue
 
+# Remove the Windows "Apps & features" entry.
+$uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\VencordExpressionPickerEnhanced"
+Remove-Item $uninstallKey -Recurse -Force -ErrorAction SilentlyContinue
+
 Write-Host ""
 Write-Host "Uninstalled." -ForegroundColor Green
 Write-Host "Restart Discord to finish."

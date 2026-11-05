@@ -3,7 +3,8 @@ size.json
 watcher.log
 *.bak-picker-resize
 
-# Release archives
+# Build outputs / release archives
+dist/
 *.zip
 
 # OS/editor

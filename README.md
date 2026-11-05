@@ -52,12 +52,21 @@ Vencord update. No Vencord build is required.
 
 ## Installation
 
-1. Download the latest release:
+1. Download **`VencordExpressionPickerEnhanced-Setup.exe`** from the latest
+   release:
    <https://github.com/quentingimenez/vencord-expression-picker-enhanced/releases/latest>
-2. Extract the ZIP.
-3. Close Discord (recommended).
-4. Double-click **`install.cmd`**.
+2. Close Discord (recommended).
+3. Run the installer. No administrator rights are required.
+4. Click **Installer**.
 5. Restart Discord.
+
+> The installer is unsigned. If Windows SmartScreen warns, click
+> **More info** then **Run anyway**.
+
+### Manual installation (ZIP)
+
+Download the ZIP from the same release, extract it, then double-click
+**`install.cmd`**. The ZIP includes `uninstall.cmd` for manual removal.
 
 > Windows 10/11, Discord desktop and Vencord installed with the official
 > installer. Vesktop and BetterDiscord are not supported.
@@ -112,7 +121,13 @@ Traditional) and Turkish. Other client languages fall back to English.
 
 ## Uninstall
 
-Double-click **`uninstall.cmd`**, then restart Discord.
+Use **Windows Settings → Apps → Installed apps → Vencord Expression Picker
+Enhanced → Uninstall**, or run the Setup again and click **Désinstaller**.
+Then restart Discord.
+
+The uninstaller restores Vencord's `preload.js` and removes the module.
+Imported GIFs are stored in Discord's IndexedDB and are **not** deleted, so
+they come back if you reinstall the module.
 
 The installer keeps a backup of `preload.js` at
 `preload.js.bak-picker-resize` and restores it during uninstallation.
@@ -130,16 +145,23 @@ The installer keeps a backup of `preload.js` at
 
 The installer:
 
-1. copies `picker-resize.js` and `watcher.ps1` to
+1. copies `picker-resize.js`, `watcher.ps1` and `uninstall.ps1` to
    `%LOCALAPPDATA%\VencordPickerResize\`;
 2. appends a loader to `%APPDATA%\Vencord\dist\preload.js`;
 3. creates `VencordPickerResize.vbs` in the Startup folder;
-4. starts the watcher, which keeps the loader in place after updates.
+4. starts the watcher, which keeps the loader in place after updates;
+5. registers **Vencord Expression Picker Enhanced** in Windows
+   **Apps & features** with a working uninstaller.
 
 The script and saved height live outside Vencord, so reinstalling Vencord
 does not remove them. Imported GIFs are stored in Discord's IndexedDB
 (local to this installation). Conversion runs entirely in the renderer
 using the bundled `gifenc` encoder; no network access, no telemetry.
+
+### Building the installer
+
+Run `installer\build-setup.ps1`. It uses the C# compiler included with
+the .NET Framework and writes `dist\VencordExpressionPickerEnhanced-Setup.exe`.
 
 ## Troubleshooting
 

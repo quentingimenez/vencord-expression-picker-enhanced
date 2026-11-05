@@ -13,6 +13,7 @@ $installDir = Join-Path $env:LOCALAPPDATA "VencordPickerResize"
 $installerPath = Join-Path $installDir "install.ps1"
 $installedScript = Join-Path $installDir "picker-resize.js"
 $installedWatcher = Join-Path $installDir "watcher.ps1"
+$installedUninstaller = Join-Path $installDir "uninstall.ps1"
 $startupDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
 $startupFile = Join-Path $startupDir "VencordPickerResize.vbs"
 
@@ -43,6 +44,7 @@ if (-not (Test-Path $preloadPath)) {
 
 $sourceScript = Resolve-Source "picker-resize.js"
 $sourceWatcher = Resolve-Source "watcher.ps1"
+$sourceUninstaller = Resolve-Source "uninstall.ps1"
 
 if (Get-Process Discord -ErrorAction SilentlyContinue) {
     Write-Host "Discord is running. Restart it after installation." -ForegroundColor Yellow
@@ -51,6 +53,7 @@ if (Get-Process Discord -ErrorAction SilentlyContinue) {
 New-Item -ItemType Directory -Force -Path $installDir | Out-Null
 Copy-IfDifferent $sourceScript $installedScript
 Copy-IfDifferent $sourceWatcher $installedWatcher
+Copy-IfDifferent $sourceUninstaller $installedUninstaller
 
 # Keep a self-contained installer in the install folder so the watcher can
 # re-apply the loader after Vencord updates.
