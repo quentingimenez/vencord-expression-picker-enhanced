@@ -313,7 +313,7 @@ html body [class*="expressionPickerPositionLayer"] [class*="drawerSizingWrapper"
         handle.setAttribute("aria-label", "Redimensionner la fenêtre");
         handle.innerHTML = `
             <svg viewBox="0 0 20 20" width="13" height="13" aria-hidden="true">
-                <path d="M3.25 16.75 16.75 3.25M3.25 10.75v6h6M16.75 9.25v-6h-6"
+                <path d="M3.25 3.25 16.75 16.75M3.25 9.25v-6h6M16.75 10.75v6h-6"
                     fill="none" stroke="currentColor" stroke-width="1.7"
                     stroke-linecap="round" stroke-linejoin="round"/>
             </svg>`;
