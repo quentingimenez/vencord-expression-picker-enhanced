@@ -18,6 +18,18 @@ function Copy-ReleaseFile([string]$source, [string]$destination) {
     Copy-Item $source $destination -Force
 }
 
+function Get-FileSha256([string]$path) {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $stream = $null
+    try {
+        $stream = [System.IO.File]::OpenRead($path)
+        return [System.BitConverter]::ToString($sha.ComputeHash($stream)).Replace("-", "")
+    } finally {
+        if ($stream) { $stream.Dispose() }
+        $sha.Dispose()
+    }
+}
+
 try {
     node (Join-Path $root "scripts\build-renderer.js")
     if ($LASTEXITCODE -ne 0) { throw "Renderer build failed." }
@@ -39,7 +51,7 @@ try {
 
     $lines = @()
     foreach ($file in @($setup, $zip)) {
-        $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+        $hash = (Get-FileSha256 $file).ToLower()
         $lines += "$hash  $([System.IO.Path]::GetFileName($file))"
     }
     Set-Content -Path $sums -Value $lines -Encoding ASCII

@@ -12,6 +12,7 @@ const installScript = fs.readFileSync(path.join(ROOT, "install.ps1"), "utf8");
 const uninstallScript = fs.readFileSync(path.join(ROOT, "uninstall.ps1"), "utf8");
 const watcherScript = fs.readFileSync(path.join(ROOT, "src", "watcher.ps1"), "utf8");
 const loaderScript = fs.readFileSync(path.join(ROOT, "src", "loader.js"), "utf8");
+const packageReleaseScript = fs.readFileSync(path.join(ROOT, "scripts", "package-release.ps1"), "utf8");
 const installCmd = fs.readFileSync(path.join(ROOT, "install.cmd"), "utf8");
 const uninstallCmd = fs.readFileSync(path.join(ROOT, "uninstall.cmd"), "utf8");
 
@@ -166,6 +167,13 @@ describe("installer loader", () => {
         };
 
         assert.equal(extract(uninstallScript), extract(installScript));
+    });
+
+    test("file hashing uses the .NET API instead of the optional Get-FileHash cmdlet", () => {
+        assert.match(installScript, /Get-FileSha256/);
+        assert.doesNotMatch(installScript, /Get-FileHash/);
+        assert.match(packageReleaseScript, /Get-FileSha256/);
+        assert.doesNotMatch(packageReleaseScript, /Get-FileHash/);
     });
 
     test("preload writes are atomic and verified", () => {
