@@ -1,30 +1,102 @@
 name: CI
 
 on:
-    push:
-    pull_request:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    test:
-        runs-on: windows-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  cache: npm
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Lint
-              run: npm run lint
+      - name: Build renderer bundle
+        run: npm run build
 
-            - name: Check formatting
-              run: npm run format:check
+      - name: Verify generated bundle
+        run: npm run build:check
 
-            - name: Run tests
-              run: npm test
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Package release
+        run: npm run release
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VencordExpressionPickerEnhanced-windows
+          path: |
+            dist/VencordExpressionPickerEnhanced-Setup.exe
+            dist/VencordExpressionPickerEnhanced-v*.zip
+            dist/SHA256SUMS.txt
+
+  unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer bundle
+        run: npm run build
+
+      - name: Verify generated bundle
+        run: npm run build:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Package release
+        run: npm run release:unix
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VencordExpressionPickerEnhanced-${{ matrix.os }}
+          path: |
+            dist/VencordExpressionPickerEnhanced-v*-unix.tar.gz
+            dist/SHA256SUMS-unix.txt

@@ -4,8 +4,8 @@
 
 - Project: <https://github.com/mattdesl/gifenc>
 - License: MIT
-- Usage: bundled and minified inside `src/picker-resize.js` to encode the
-  imported frames as GIF.
+- Usage: vendored in `src/renderer/02-gifenc.js` and concatenated into the
+  generated renderer bundle to encode the imported frames as GIF.
 
 ```text
 MIT License

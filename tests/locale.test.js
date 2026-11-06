@@ -17,6 +17,8 @@ describe("localization", () => {
         assert.equal(imports.normalizeLocale("zh-Hans"), "zh-CN");
         assert.equal(imports.normalizeLocale("zh-Hant"), "zh-TW");
         assert.equal(imports.normalizeLocale("zh-Hant-TW"), "zh-TW");
+        assert.equal(imports.normalizeLocale("zh-HK"), "zh-TW");
+        assert.equal(imports.normalizeLocale("zh-MO"), "zh-TW");
         assert.equal(imports.normalizeLocale("ZH-hans"), "zh-CN");
         assert.equal(imports.normalizeLocale("pl"), "pl");
     });
@@ -145,5 +147,30 @@ describe("localization", () => {
         const fixture = createFixture({ locale: "fr" });
         assert.equal(fixture.imports.t("countResults", { count: 0 }), "0 résultat");
         assert.equal(fixture.imports.t("countResults", { count: 2 }), "2 résultats");
+    });
+
+    test("every locale has the same keys and placeholders", () => {
+        const { imports } = createFixture();
+        const messages = imports.messages;
+        const locales = Object.keys(messages);
+        const keys = Object.keys(messages.en).sort();
+
+        const placeholders = (value) => {
+            const texts = typeof value === "string" ? [value] : Object.values(value || {});
+            return [
+                ...new Set(texts.flatMap((text) => [...String(text).matchAll(/\{(\w+)\}/g)].map((match) => match[1])))
+            ].sort();
+        };
+
+        for (const locale of locales) {
+            assert.deepEqual(Object.keys(messages[locale]).sort(), keys, `${locale} has missing or extra keys`);
+            for (const key of keys) {
+                assert.deepEqual(
+                    placeholders(messages[locale][key]),
+                    placeholders(messages.en[key]),
+                    `${locale}.${key} does not use the same placeholders as English`
+                );
+            }
+        }
     });
 });

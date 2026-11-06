@@ -71,7 +71,7 @@ describe("native favorite matching", () => {
         assert.deepEqual(toPlain(fixture.imports.getNativeFavoriteEntries()), []);
     });
 
-    test("getImportedNativeMatches compares names case-insensitively with a 2px tolerance", () => {
+    test("buildImportFavoriteIndex compares names case-insensitively with a 2px tolerance", () => {
         const fixture = createFixture({
             Vencord: favoriteStore({
                 catExact: {
@@ -96,8 +96,8 @@ describe("native favorite matching", () => {
             { id: "c", name: "dog.gif", width: 640, height: 480 }
         ]);
 
-        const matches = fixture.imports.getImportedNativeMatches();
-        assert.deepEqual(toPlain(matches.map((match) => [match.record.id, match.entry.key])), [
+        const index = fixture.imports.buildImportFavoriteIndex();
+        assert.deepEqual(toPlain(index.matches.map((match) => [match.record.id, match.entry.key])), [
             ["a", "catExact"],
             ["c", "dogNoSize"]
         ]);
@@ -105,6 +105,9 @@ describe("native favorite matching", () => {
         assert.deepEqual(toPlain(fixture.imports.getFavoriteKeysForRecord({ id: "a" })), ["catExact"]);
         assert.deepEqual(toPlain(fixture.imports.getFavoriteKeysForRecord({ id: "b" })), []);
         assert.deepEqual(toPlain(fixture.imports.getFavoriteKeysForRecord({ id: "c" })), ["dogNoSize"]);
+
+        // A second call must reuse the cached index while the inputs are unchanged.
+        assert.equal(fixture.imports.buildImportFavoriteIndex(), index);
     });
 
     test("getFavoriteKeysForRecord returns every matching favorite", () => {

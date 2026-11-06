@@ -3,17 +3,25 @@
   "version": "1.7.0",
   "private": true,
   "type": "commonjs",
-  "description": "Larger, resizable and persistent expression picker for Vencord on Windows",
+  "description": "Larger, resizable and persistent expression picker for Vencord on Windows, macOS and Linux",
   "scripts": {
+    "build": "node scripts/build-renderer.js",
+    "build:check": "node scripts/build-renderer.js --check",
+    "release": "node scripts/package-release.js",
+    "release:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1",
+    "release:unix": "sh scripts/package-release.sh",
+    "pretest": "npm run build",
+    "test": "node --test",
+    "test:coverage": "npm run build && node --experimental-test-coverage --test",
+    "test:watch": "npm run build && node --test --watch",
+    "prelint": "npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "node --test",
-    "test:watch": "node --test --watch"
+    "format:check": "prettier --check ."
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.13.0 || >=24.0.0"
   },
   "license": "MIT",
   "devDependencies": {

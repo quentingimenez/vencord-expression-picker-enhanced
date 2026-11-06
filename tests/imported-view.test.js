@@ -55,6 +55,7 @@ describe("imported view rendering", () => {
         assert.equal(tile.children.length, 3);
         assert.equal(tile.children[0].getAttribute("aria-label"), "Add rec.gif to message");
         assert.equal(tile.children[1].getAttribute("aria-label"), "Add to favorites");
+        assert.equal(tile.children[1].getAttribute("aria-pressed"), "false");
         assert.equal(tile.children[2].getAttribute("aria-label"), "Delete rec.gif");
         assert.equal(empty.style.display, "none");
         assert.equal(count.textContent, "1 GIF");

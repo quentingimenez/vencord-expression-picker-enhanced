@@ -1,8 +1,13 @@
 # Vencord Expression Picker Enhanced
 
 **A larger, resizable and persistent GIF / emoji picker for Vencord on Windows,
-with local GIF import, favorites management, search and automatic localization.**
-One-click installer, no Vencord build required.
+macOS and Linux, with local GIF import, favorites management, search and
+automatic localization.**
+Simple installer, no Vencord build required.
+
+> Vencord officially supports Windows, macOS and Linux. This module supports
+> the official Vencord installer on all three desktop platforms. Vesktop and
+> BetterDiscord are not supported.
 
 > Renamed from **Vencord Expression Picker Resize**. Existing installs and
 > imported GIFs keep working; the internal storage paths are unchanged.
@@ -22,8 +27,8 @@ One-click installer, no Vencord build required.
   the GIF page. GIF, PNG, JPEG, WebP, AVIF, APNG, BMP, MP4, WebM, MOV, MKV
   and M4V are accepted and converted to GIF automatically.
 - Imported GIFs appear in a dedicated **Importés** category in the GIF
-  picker, with the same masonry layout, color filter and search bar as
-  native Favorites. Click one to attach it to the message box.
+  picker, with the same masonry layout and search bar as native Favorites.
+  Click one to attach it to the message box.
 - Hovering an imported GIF in **Favorites** shows a delete button with the
   same design as Discord's favorite button. It removes both the native
   favorite and the local import in one click.
@@ -36,7 +41,8 @@ One-click installer, no Vencord build required.
   Favorites, Importés or a trending category) when it is closed and
   reopened.
 - The interface follows the Discord client language automatically.
-- Survives Discord updates.
+- Designed to survive Discord updates: selectors use stable prefixes and
+  degrade independently if Discord changes its DOM.
 - Survives Vencord updates thanks to a small watcher that re-applies the
   loader when `preload.js` is replaced.
 
@@ -52,6 +58,11 @@ Vencord update. No Vencord build is required.
 
 ## Installation
 
+Vencord must already be installed with the official installer on Discord
+desktop (Windows, macOS or Linux).
+
+### Windows
+
 1. Download **`VencordExpressionPickerEnhanced-Setup.exe`** from the latest
    release:
    <https://github.com/quentingimenez/vencord-expression-picker-enhanced/releases/latest>
@@ -63,13 +74,39 @@ Vencord update. No Vencord build is required.
 > The installer is unsigned. If Windows SmartScreen warns, click
 > **More info** then **Run anyway**.
 
-### Manual installation (ZIP)
+### macOS and Linux
 
-Download the ZIP from the same release, extract it, then double-click
-**`install.cmd`**. The ZIP includes `uninstall.cmd` for manual removal.
+1. Download **`VencordExpressionPickerEnhanced-vX.Y.Z-unix.tar.gz`** from the
+   latest release:
+   <https://github.com/quentingimenez/vencord-expression-picker-enhanced/releases/latest>
+2. Extract the archive.
+3. Close Discord (recommended).
+4. Open a terminal in the extracted folder and run:
 
-> Windows 10/11, Discord desktop and Vencord installed with the official
-> installer. Vesktop and BetterDiscord are not supported.
+   ```sh
+   sh install.sh
+   ```
+
+   No administrator rights are required.
+
+5. Restart Discord.
+
+If Vencord is installed in a non-standard location (for example a custom
+Flatpak path), prefix the command with `VENCORD_DIR=/path/to/Vencord`.
+
+> The scripts are unsigned. On macOS, Gatekeeper may ask you to confirm the
+> first launch; on Linux, review the scripts before running them if your
+> distribution warns about downloaded shell scripts.
+
+### Manual installation (archive)
+
+The Windows ZIP contains `install.cmd` and `uninstall.cmd`; double-click
+`install.cmd` to install. The macOS/Linux `unix.tar.gz` contains `install.sh`
+and `uninstall.sh`; run `sh install.sh` or `sh uninstall.sh`.
+
+> Requirements: Windows 10/11, macOS or Linux; Discord desktop and Vencord
+> installed with the official installer. Vencord does not support the Snap
+> build of Discord; the installer detects native and Flatpak Vencord paths.
 
 ## Usage
 
@@ -92,7 +129,7 @@ grip handles both dimensions.
 3. Select one or more files. Accepted formats: GIF, PNG, JPEG, WebP, AVIF,
    APNG, BMP, MP4, WebM, MOV, MKV and M4V.
 4. Images and videos are converted to GIF automatically (max 480 px,
-   6 seconds, 10 fps, 8 MB output).
+   6 seconds, 8 MB output; videos are sampled at 10 fps).
 5. Open the **Importés** category in the GIF picker. The first tile has the
    same function as the top-right upload button, so you can import more
    files from there. Imported GIFs use the same masonry sizing as native
@@ -123,89 +160,163 @@ Traditional) and Turkish. Other client languages fall back to English.
 
 ## Uninstall
 
+### Windows
+
 Use **Windows Settings → Apps → Installed apps → Vencord Expression Picker
 Enhanced → Uninstall**, or run the Setup again and click **Désinstaller**.
 Then restart Discord.
 
-The uninstaller restores Vencord's `preload.js` and removes the module.
-Imported GIFs are stored in Discord's IndexedDB and are **not** deleted, so
-they come back if you reinstall the module.
+### macOS and Linux
 
-The installer keeps a backup of `preload.js` at
-`preload.js.bak-picker-resize` and restores it during uninstallation.
+Run `sh uninstall.sh` from the extracted archive, or
+`sh "<Vencord>/dist/picker-resize/uninstall.sh"` if the archive is gone. Then
+restart Discord.
+
+The uninstaller removes the loader block from Vencord's current `preload.js`,
+the startup entry and the module. Imported GIFs are stored in Discord's
+IndexedDB and are **not** deleted, so they come back if you reinstall the
+module.
+
+The installer keeps a backup of the original `preload.js` at
+`preload.js.bak-picker-resize`. The uninstaller does not restore that backup
+over a newer Vencord file; it only strips the loader from the current file.
+The backup is kept solely as a last-resort restore if the current file is
+empty after a failed cleanup.
 
 ## Updates
 
 - **Discord updates**: Vencord automatically re-patches the new `app.asar`;
   no action is required.
-- **Vencord updates**: the watcher monitors
-  `%APPDATA%\Vencord\dist\preload.js` and re-applies the loader
-  automatically. If the grip ever disappears after an update, run
-  `install.cmd` again and restart Discord.
+- **Vencord updates**: the watcher monitors Vencord's `dist/preload.js` and
+  re-applies the loader automatically. The path is
+  `%APPDATA%\Vencord\dist\preload.js` on Windows,
+  `~/Library/Application Support/Vencord/dist/preload.js` on macOS (or
+  `~/.config/Vencord/dist/preload.js` depending on the Vencord installer
+  version), and `~/.config/Vencord/dist/preload.js` on Linux (or the
+  `~/.var/app/com.discordapp.Discord/config/Vencord` Flatpak path).
+  The watcher starts at login through the Windows Startup folder, a macOS
+  LaunchAgent, or an XDG autostart entry on Linux. If the grip ever
+  disappears after an update, run the installer again (`install.cmd` on
+  Windows, `sh install.sh` on macOS/Linux) and restart Discord.
+
+### Robustness
+
+- `preload.js` is replaced atomically (temporary file + `File.Replace` on
+  Windows, same-directory rename on macOS/Linux) and the result is verified
+  before the old file is discarded. The installer refuses to write a patch
+  that does not contain exactly one loader block.
+- The loader itself is wrapped in `try/catch`: if Vencord's preload or
+  Electron APIs change, the error is logged and Discord keeps working.
+- The uninstaller removes the loader block from the **current** `preload.js`
+  instead of restoring an old backup, so a Vencord update cannot cause a
+  downgrade during uninstallation. If the file cannot be cleaned, it stops
+  and keeps the installed files and uninstall entry so you can retry after
+  closing Discord/Vencord.
+- The watcher waits for Vencord's folder to exist, uses a mutex (Windows) or
+  an atomic lock directory (macOS/Linux) to avoid duplicate instances, and
+  recreates its file watcher if it fails.
+- Each renderer feature (resize, imports, category card, view restore) runs
+  in its own guarded step. A broken selector or a transient DOM change only
+  disables that step until the next maintenance tick.
+- Discord selectors prefer stable class prefixes and discover the current
+  card class at runtime.
 
 ## How it works
 
 The installer:
 
-1. copies `picker-resize.js`, `watcher.ps1` and `uninstall.ps1` to
-   `%LOCALAPPDATA%\VencordPickerResize\`;
-2. appends a loader to `%APPDATA%\Vencord\dist\preload.js`;
-3. creates `VencordPickerResize.vbs` in the Startup folder;
+1. copies `picker-resize.js`, `loader.js`, the watcher and the uninstaller to
+   `%LOCALAPPDATA%\VencordPickerResize\` on Windows, or to
+   `<Vencord>/dist/picker-resize/` on macOS and Linux;
+2. appends a loader to Vencord's `dist/preload.js`;
+3. creates a startup entry (Windows Startup folder, macOS LaunchAgent or
+   Linux XDG autostart);
 4. starts the watcher, which keeps the loader in place after updates;
 5. registers **Vencord Expression Picker Enhanced** in Windows
-   **Apps & features** with a working uninstaller.
+   **Apps & features** with a working uninstaller (Windows only).
 
-The script and saved height live outside Vencord, so reinstalling Vencord
-does not remove them. Imported GIFs are stored in Discord's IndexedDB
-(local to this installation). Conversion runs entirely in the renderer
-using the bundled `gifenc` encoder; no network access, no telemetry.
+The module lives in `<Vencord>/dist/picker-resize` on macOS/Linux (inside the
+directory Flatpak already grants to Vencord) and in
+`%LOCALAPPDATA%\VencordPickerResize` on Windows, so Vencord updates only
+replace `preload.js` and leave the module in place. Imported GIFs are stored
+in Discord's IndexedDB (local to this installation). Conversion runs entirely
+in the renderer using the bundled `gifenc` encoder; no network access, no
+telemetry.
 
-### Building the installer
+### Building the releases
 
-Run `installer\build-setup.ps1`. It uses the C# compiler included with
-the .NET Framework and writes `dist\VencordExpressionPickerEnhanced-Setup.exe`.
+Run `npm run release`. It detects the current platform:
+
+- **Windows**: builds the renderer, compiles the C# setup, creates a clean
+  manual-install ZIP and writes `dist\SHA256SUMS.txt`. The C# compiler is the
+  one included with the .NET Framework; the setup executable is written to
+  `dist\VencordExpressionPickerEnhanced-Setup.exe`.
+- **macOS / Linux**: builds the renderer and writes
+  `dist/VencordExpressionPickerEnhanced-vX.Y.Z-unix.tar.gz` plus
+  `dist/SHA256SUMS-unix.txt`. The archive only needs Node.js, a POSIX shell
+  and `tar` to build.
+
+You can also call `npm run release:windows` or `npm run release:unix`
+explicitly. CI runs the full suite and packages the release on Windows,
+Ubuntu and macOS.
 
 ### Development
 
-The renderer is a single injected file, `src/picker-resize.js`, because the
-preload loader executes one script in the page world. It is organized in one
-IIFE with shared utilities, then the resize feature and the import feature.
-Discord's hashed selectors are centralized in `SELECTORS`; user-visible
-strings live in `MESSAGES`. Keep both in sync when Discord changes its DOM
-or a translation is added.
+The renderer is still shipped as one injected file because the preload loader
+executes a single script in the page world. Its source is split into focused
+fragments under `src/renderer/` (core, resize, i18n, imports, styles and
+bootstrap). `npm run build` concatenates them into the generated
+`dist/picker-resize.js`; the installer ships that bundle. Never edit the
+generated file directly.
+
+Discord's hashed selectors are centralized in `SELECTORS`; native styling
+hooks live in `NATIVE_CLASSES`; user-visible strings live in `MESSAGES`. Keep
+them in sync when Discord changes its DOM or a translation is added.
 
 Install the development tools, then run the checks:
 
-```powershell
+```console
 npm install
+npm run build
 npm test
 npm run lint
 npm run format:check
 ```
 
-The test suite itself uses Node.js's built-in test runner and has no runtime
-dependencies. It covers size persistence, drag clamping, localization and
-plurals, the last-opened-view cookie, native favorite matching, masonry
-layout, GIF encoding, import validation, and the installer/watcher scripts.
-Node.js 20 or newer is required. Prettier and ESLint are development-only
-dependencies; the bundled `gifenc` block is excluded from both. The quality
+`npm test` also builds the bundle automatically. The suite uses Node.js's
+built-in test runner and has no runtime dependencies. It covers size
+persistence, drag clamping, localization and plurals, the last-opened-view
+cookie, native favorite matching, masonry layout, image/video conversion, GIF
+encoding, import validation, maintenance, and real install/uninstall cycles
+against temporary Vencord trees (Windows PowerShell plus a POSIX test on
+macOS/Linux). `npm run test:coverage` prints the coverage report. Node.js
+22.13+ or 24+ is required. Prettier and ESLint are development-only
+dependencies; the vendored `gifenc` block is excluded from both. The quality
 audit and the rationale behind the current structure are documented in
 [`AUDIT.md`](AUDIT.md).
 
 ## Troubleshooting
 
-- **"Vencord was not found"**: Vencord is not installed at the standard
-  path, or you are using Vesktop. This project targets the official
-  Vencord installer.
-- **Nothing happens after restarting**: run `install.cmd` again, then
-  restart Discord. Check that
-  `%APPDATA%\Vencord\dist\preload.js` contains
+- **"Vencord was not found"**: Vencord is not installed at the standard path,
+  or you are using Vesktop. This project targets the official Vencord
+  installer. The expected `preload.js` is under
+  `%APPDATA%\Vencord\dist\` on Windows,
+  `~/Library/Application Support/Vencord/dist/` (or
+  `~/.config/Vencord/dist/`) on macOS, and `~/.config/Vencord/dist/` (or the
+  Flatpak config path) on Linux.
+- **Nothing happens after restarting**: run the installer again
+  (`install.cmd` on Windows, `sh install.sh` on macOS/Linux), then restart
+  Discord. Check that `preload.js` contains
   `VC_PICKER_RESIZE_LOADER_START`.
 - **The grip disappeared after an update**: the watcher was probably not
-  running. Run `install.cmd` again.
-- **Antivirus / PowerShell**: the scripts are readable and only copy local
-  files and modify `preload.js`. `install.cmd` starts PowerShell with
-  `-ExecutionPolicy Bypass` to allow unsigned scripts.
+  running. Run the installer again. The watcher log is
+  `%LOCALAPPDATA%\VencordPickerResize\watcher.log` on Windows and
+  `<Vencord>/dist/picker-resize/watcher.log` on macOS/Linux.
+- **Antivirus / PowerShell / Gatekeeper**: the scripts are readable and only
+  copy local files and modify `preload.js`. `install.cmd` starts PowerShell
+  with `-ExecutionPolicy Bypass` to allow unsigned scripts. On macOS, allow
+  the downloaded script if Gatekeeper asks. On Linux, review the shell
+  scripts before running them if your distribution warns.
 
 ## Disclaimer
 

@@ -127,6 +127,17 @@ describe("GIF tile reveal", () => {
         assert.equal(matchingRoot.__vcGifReady, true);
     });
 
+    test("markGifMedia ignores non-media elements", () => {
+        const fixture = createFixture();
+        const container = fixture.document.createElement("div");
+        container.classList.add("gif__");
+
+        fixture.resize.markGifMedia(container);
+
+        assert.equal(container.__vcGifMarked, undefined);
+        assert.equal(container.listeners.size, 0);
+    });
+
     test("markGifMediaIn ignores non-element roots", () => {
         const fixture = createFixture();
         const root = { nodeType: 3, querySelectorAll: () => [] };

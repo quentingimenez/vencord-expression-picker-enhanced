@@ -13,19 +13,21 @@ $installDir = Join-Path $env:LOCALAPPDATA "VencordPickerResize"
 $installerPath = Join-Path $installDir "install.ps1"
 $installedScript = Join-Path $installDir "picker-resize.js"
 $installedWatcher = Join-Path $installDir "watcher.ps1"
+$installedLoader = Join-Path $installDir "loader.js"
 $installedUninstaller = Join-Path $installDir "uninstall.ps1"
 $startupDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
 $startupFile = Join-Path $startupDir "VencordPickerResize.vbs"
 
 function Resolve-Source([string]$name) {
     $candidates = @(
+        (Join-Path $repoRoot "dist\$name"),
         (Join-Path $repoRoot "src\$name"),
         (Join-Path $repoRoot $name)
     )
     foreach ($candidate in $candidates) {
         if (Test-Path $candidate) { return $candidate }
     }
-    throw "Missing $name (looked in src\ and the installer folder)."
+    throw "Missing $name (looked in dist\, src\ and the installer folder)."
 }
 
 function Copy-FileIfChanged([string]$source, [string]$destination) {
@@ -42,6 +44,65 @@ function Copy-FileIfChanged([string]$source, [string]$destination) {
     Copy-Item $src $dst -Force
 }
 
+# Replace a file atomically and verify the written content. preload.js is a
+# critical Vencord file: a power loss or a full disk must never leave it
+# truncated.
+function Write-FileAtomic([string]$path, [string]$content) {
+    $directory = Split-Path -Parent $path
+    if (-not $directory) { $directory = "." }
+
+    $name = [System.IO.Path]::GetFileName($path)
+    $suffix = [guid]::NewGuid().ToString("N")
+    $tempPath = Join-Path $directory ("." + $name + "." + $suffix + ".tmp")
+    $backupPath = Join-Path $directory ("." + $name + "." + $suffix + ".bak")
+    $replaced = $false
+    $keepBackup = $false
+
+    try {
+        [System.IO.File]::WriteAllText($tempPath, $content, [System.Text.UTF8Encoding]::new($false))
+
+        if ([System.IO.File]::Exists($path)) {
+            # File.Replace is atomic on NTFS and keeps the original as a backup
+            # until the new content has been verified.
+            [System.IO.File]::Replace($tempPath, $path, $backupPath, $true)
+            $replaced = $true
+        } else {
+            Move-Item -LiteralPath $tempPath -Destination $path -Force
+            $replaced = $true
+        }
+
+        $written = [System.IO.File]::ReadAllText($path)
+        if ($written -ne $content) {
+            throw "Atomic write verification failed for $path"
+        }
+
+        Remove-Item $backupPath -Force -ErrorAction SilentlyContinue
+    } catch {
+        if ($replaced) {
+            $restored = $false
+            try {
+                if (Test-Path $backupPath) {
+                    Copy-Item $backupPath $path -Force
+                    $restored = $true
+                } else {
+                    Remove-Item $path -Force -ErrorAction SilentlyContinue
+                    $restored = $true
+                }
+            } catch { }
+            if (-not $restored) {
+                $keepBackup = $true
+                Write-Warning "Could not restore $path. The backup was kept at $backupPath."
+            }
+        }
+        throw
+    } finally {
+        Remove-Item $tempPath -Force -ErrorAction SilentlyContinue
+        if (-not $keepBackup) {
+            Remove-Item $backupPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 Write-Host "Vencord Expression Picker Enhanced - installer" -ForegroundColor Cyan
 
 if (-not (Test-Path $preloadPath)) {
@@ -50,6 +111,7 @@ if (-not (Test-Path $preloadPath)) {
 
 $sourceScript = Resolve-Source "picker-resize.js"
 $sourceWatcher = Resolve-Source "watcher.ps1"
+$sourceLoader = Resolve-Source "loader.js"
 $sourceUninstaller = Resolve-Source "uninstall.ps1"
 
 if (Get-Process Discord -ErrorAction SilentlyContinue) {
@@ -59,6 +121,7 @@ if (Get-Process Discord -ErrorAction SilentlyContinue) {
 New-Item -ItemType Directory -Force -Path $installDir | Out-Null
 Copy-FileIfChanged $sourceScript $installedScript
 Copy-FileIfChanged $sourceWatcher $installedWatcher
+Copy-FileIfChanged $sourceLoader $installedLoader
 Copy-FileIfChanged $sourceUninstaller $installedUninstaller
 
 # Keep a self-contained installer in the install folder so the watcher can
@@ -83,87 +146,43 @@ $content = [System.IO.File]::ReadAllText($preloadPath)
 $backupPath = "$preloadPath.bak-picker-resize"
 if (-not $content.Contains("VC_PICKER_RESIZE_LOADER_START")) {
     # Keep a backup of the current, unpatched preload (e.g. after a Vencord update).
-    Copy-Item $preloadPath $backupPath -Force
+    Write-FileAtomic $backupPath $content
 }
 
 # Keep this removal pattern in sync with uninstall.ps1 (covered by tests).
 $pattern = '(?s)\r?\n?/\* VC_PICKER_RESIZE_LOADER_START \*/.*?/\* VC_PICKER_RESIZE_LOADER_END \*/'
 $content = [System.Text.RegularExpressions.Regex]::Replace($content, $pattern, "")
 
-$loader = @'
-
-/* VC_PICKER_RESIZE_LOADER_START */
-try {
-    const __vcPickerFs = require("fs");
-    const __vcPickerPath = require("path");
-    const __vcPickerRoot = __vcPickerPath.join(process.env.LOCALAPPDATA || "", "VencordPickerResize");
-    const __vcPickerCandidates = [
-        __vcPickerPath.join(__vcPickerRoot, "picker-resize.js"),
-        __vcPickerPath.join(__dirname, "..", "picker-resize", "picker-resize.js")
-    ];
-    const __vcPickerFile = __vcPickerCandidates.find(file => __vcPickerFs.existsSync(file));
-
-    if (__vcPickerFile) {
-        const __vcPickerSizeFile = __vcPickerPath.join(__vcPickerRoot, "size.json");
-        const __vcPickerSettingsFile = __vcPickerPath.join(__dirname, "..", "settings", "settings.json");
-        let __vcPickerHeight = null;
-
-        // Keep these bounds in sync with src/picker-resize.js.
-        const __vcPickerMinHeight = 320;
-        const __vcPickerMaxHeight = 5000;
-
-        try {
-            const __vcPickerSize = JSON.parse(__vcPickerFs.readFileSync(__vcPickerSizeFile, "utf8"));
-            if (Number.isFinite(__vcPickerSize.height)
-                && __vcPickerSize.height >= __vcPickerMinHeight
-                && __vcPickerSize.height <= __vcPickerMaxHeight) {
-                __vcPickerHeight = Math.round(__vcPickerSize.height);
-            }
-        } catch { }
-
-        if (__vcPickerHeight == null) {
-            try {
-                const __vcPickerSettings = JSON.parse(__vcPickerFs.readFileSync(__vcPickerSettingsFile, "utf8"));
-                const __vcPickerLegacy = __vcPickerSettings.vcExpressionPickerSize;
-                if (__vcPickerLegacy
-                    && Number.isFinite(__vcPickerLegacy.height)
-                    && __vcPickerLegacy.height >= __vcPickerMinHeight
-                    && __vcPickerLegacy.height <= __vcPickerMaxHeight) {
-                    __vcPickerHeight = Math.round(__vcPickerLegacy.height);
-                }
-            } catch { }
-        }
-
-        const __vcPickerElectron = require("electron/renderer");
-        __vcPickerElectron.contextBridge.exposeInMainWorld("VencordPickerResize", {
-            savedHeight: __vcPickerHeight,
-            saveHeight(height) {
-                try {
-                    if (!Number.isFinite(height)
-                        || height < __vcPickerMinHeight
-                        || height > __vcPickerMaxHeight) return;
-                    __vcPickerFs.mkdirSync(__vcPickerRoot, { recursive: true });
-                    __vcPickerFs.writeFileSync(
-                        __vcPickerSizeFile,
-                        JSON.stringify({ height: Math.round(height) }, null, 2)
-                    );
-                } catch (err) {
-                    console.error("[PickerResize] Failed to save height", err);
-                }
-            }
-        });
-
-        __vcPickerElectron.webFrame
-            .executeJavaScript(__vcPickerFs.readFileSync(__vcPickerFile, "utf8"))
-            .catch(err => console.error("[PickerResize]", err));
-    }
-} catch (err) {
-    console.error("[PickerResize]", err);
+$loader = [System.IO.File]::ReadAllText($sourceLoader)
+$loader = $loader.TrimEnd("`r", "`n")
+if (-not $loader.StartsWith("/* VC_PICKER_RESIZE_LOADER_START */", [System.StringComparison]::Ordinal)) {
+    throw "loader.js is missing the start marker."
 }
-/* VC_PICKER_RESIZE_LOADER_END */
-'@
+if (-not $loader.EndsWith("/* VC_PICKER_RESIZE_LOADER_END */", [System.StringComparison]::Ordinal)) {
+    throw "loader.js is missing the end marker."
+}
 
-[System.IO.File]::WriteAllText($preloadPath, $content + $loader, [System.Text.UTF8Encoding]::new($false))
+$patched = $content + "`r`n" + $loader
+$startCount = ([System.Text.RegularExpressions.Regex]::Matches(
+    $patched,
+    [System.Text.RegularExpressions.Regex]::Escape("VC_PICKER_RESIZE_LOADER_START")
+)).Count
+$endCount = ([System.Text.RegularExpressions.Regex]::Matches(
+    $patched,
+    [System.Text.RegularExpressions.Regex]::Escape("VC_PICKER_RESIZE_LOADER_END")
+)).Count
+
+if ($startCount -ne 1 -or $endCount -ne 1) {
+    throw "Refusing to patch preload.js: expected exactly one loader block, found $startCount start and $endCount end markers."
+}
+if (-not $patched.StartsWith($content, [System.StringComparison]::Ordinal)) {
+    throw "Refusing to patch preload.js: the original content was not preserved."
+}
+if (-not $patched.EndsWith($loader, [System.StringComparison]::Ordinal)) {
+    throw "Refusing to patch preload.js: the loader was not appended at the end of the file."
+}
+
+Write-FileAtomic $preloadPath $patched
 
 # Startup launcher
 $vbs = @'
@@ -171,7 +190,7 @@ Set sh = CreateObject("WScript.Shell")
 path = sh.ExpandEnvironmentStrings("%LOCALAPPDATA%") & "\VencordPickerResize\watcher.ps1"
 sh.Run "powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File """ & path & """", 0, False
 '@
-[System.IO.File]::WriteAllText($startupFile, $vbs, [System.Text.UTF8Encoding]::new($false))
+Write-FileAtomic $startupFile $vbs
 
 # Start the watcher now through the same detached launcher used at logon.
 if (-not $FromWatcher) {

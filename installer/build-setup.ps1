@@ -19,12 +19,16 @@ $output = Join-Path $dist "VencordExpressionPickerEnhanced-Setup.exe"
 $resources = @(
     (Join-Path $root "install.ps1"),
     (Join-Path $root "uninstall.ps1"),
-    (Join-Path $root "src\picker-resize.js"),
+    (Join-Path $root "dist\picker-resize.js"),
     (Join-Path $root "src\watcher.ps1"),
+    (Join-Path $root "src\loader.js"),
     (Join-Path $root "assets\app.ico")
 )
 foreach ($resource in $resources) {
     if (-not (Test-Path $resource)) {
+        if ($resource -like "*picker-resize.js") {
+            throw "Missing build resource: $resource. Run npm run build first."
+        }
         throw "Missing build resource: $resource"
     }
 }
@@ -37,8 +41,9 @@ foreach ($resource in $resources) {
     /r:System.Windows.Forms.dll /r:System.Drawing.dll `
     /resource:"$root\install.ps1",payload.install.ps1 `
     /resource:"$root\uninstall.ps1",payload.uninstall.ps1 `
-    /resource:"$root\src\picker-resize.js",payload.picker-resize.js `
+    /resource:"$root\dist\picker-resize.js",payload.picker-resize.js `
     /resource:"$root\src\watcher.ps1",payload.watcher.ps1 `
+    /resource:"$root\src\loader.js",payload.loader.js `
     /resource:"$root\assets\app.ico",payload.app.ico `
     "$PSScriptRoot\Installer.cs"
 

@@ -31,15 +31,19 @@ const nodeGlobals = {
     Buffer: "readonly",
     module: "readonly",
     process: "readonly",
-    require: "readonly"
+    require: "readonly",
+    setImmediate: "readonly"
 };
 
 export default [
     {
-        ignores: ["dist/**", "node_modules/**", "assets/**"]
+        ignores: ["node_modules/**", "assets/**"]
     },
     {
-        files: ["src/**/*.js"],
+        // The fragments are concatenated into one IIFE, so cross-fragment
+        // symbols are intentionally undefined in a single file. The generated
+        // bundle is linted with no-undef/no-unused-vars enabled below.
+        files: ["src/renderer/**/*.js"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "script",
@@ -47,6 +51,46 @@ export default [
                 ...browserGlobals,
                 Gifenc: "readonly"
             }
+        },
+        rules: {
+            ...js.configs.recommended.rules,
+            "no-undef": "off",
+            "no-unused-vars": "off"
+        }
+    },
+    {
+        files: ["dist/picker-resize.js"],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: "script",
+            globals: {
+                ...browserGlobals,
+                Gifenc: "readonly"
+            }
+        },
+        rules: {
+            ...js.configs.recommended.rules,
+            "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }]
+        }
+    },
+    {
+        files: ["src/loader.js"],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: "script",
+            globals: nodeGlobals
+        },
+        rules: {
+            ...js.configs.recommended.rules,
+            "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }]
+        }
+    },
+    {
+        files: ["scripts/**/*.js"],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: "commonjs",
+            globals: nodeGlobals
         },
         rules: {
             ...js.configs.recommended.rules,
@@ -66,7 +110,7 @@ export default [
         }
     },
     {
-        files: ["*.mjs", "*.js"],
+        files: ["*.mjs"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",

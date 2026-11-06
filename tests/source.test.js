@@ -5,11 +5,10 @@ const assert = require("node:assert/strict");
 const { createFixture, SOURCE } = require("./helpers/picker-harness");
 
 describe("source loading", () => {
-    test("loads both renderer modules and exposes the test hooks", () => {
+    test("loads the generated renderer bundle and exposes the test hooks", () => {
         const fixture = createFixture();
 
         assert.equal(fixture.sandbox.__vcExpressionPickerResizeInstalled, true);
-        assert.equal(fixture.sandbox.__vcPickerImportInstalled, true);
         assert.equal(typeof fixture.resize.clamp, "function");
         assert.equal(typeof fixture.imports.t, "function");
     });
@@ -19,7 +18,6 @@ describe("source loading", () => {
 
         assert.deepEqual(fixture.hook, {});
         assert.equal(fixture.sandbox.__vcExpressionPickerResizeInstalled, undefined);
-        assert.equal(fixture.sandbox.__vcPickerImportInstalled, undefined);
     });
 
     test("allows an empty hostname during preload", () => {
@@ -63,7 +61,8 @@ describe("source loading", () => {
             ".mp4",
             ".webm",
             ".mov",
-            ".mkv"
+            ".mkv",
+            ".m4v"
         ]) {
             assert.ok(accepted.includes(extension), `${extension} is missing from ACCEPT`);
         }
@@ -72,18 +71,49 @@ describe("source loading", () => {
         assert.ok(accepted.includes("video/webm"));
     });
 
-    test("the stylesheet contains the picker, resize and import selectors", () => {
-        assert.match(SOURCE, /expressionPickerPositionLayer/);
-        assert.match(SOURCE, /--vc-picker-saved-height/);
-        assert.match(SOURCE, /HANDLE_CLASS = "vc-picker-resize"/);
-        assert.match(SOURCE, /gif-picker-tab-panel/);
-        assert.match(SOURCE, /\.vc-imported-view/);
-        assert.match(SOURCE, /\.vc-gif-import/);
-        assert.match(SOURCE, /\.vc-native-delete/);
+    test("the stylesheets contain the picker, resize and import selectors", () => {
+        const fixture = createFixture();
+        const { STATIC_CSS, IMPORT_CSS } = fixture.imports.constants;
+
+        assert.match(STATIC_CSS, /expressionPickerPositionLayer/);
+        assert.match(STATIC_CSS, /--vc-picker-saved-height/);
+        assert.match(STATIC_CSS, /\.vc-picker-resize/);
+        assert.match(STATIC_CSS, /gif-picker-tab-panel/);
+        assert.match(IMPORT_CSS, /\.vc-imported-view/);
+        assert.match(IMPORT_CSS, /\.vc-gif-import/);
+        assert.match(IMPORT_CSS, /\.vc-native-delete/);
     });
 
     test("the test hooks are opt-in", () => {
         assert.match(SOURCE, /__VC_PICKER_RESIZE_TEST__/);
         assert.match(SOURCE, /if \(TEST_HOOK\)/);
+    });
+
+    test("safeRun isolates a failing integration step", () => {
+        const fixture = createFixture();
+
+        const result = fixture.imports.safeRun("explode", () => {
+            throw new Error("boom");
+        });
+
+        assert.equal(result, undefined);
+        assert.ok(
+            fixture.logs.some((entry) => String(entry.args[0]).includes("explode failed")),
+            "the failure should be logged"
+        );
+    });
+
+    test("root card detection discovers the current hashed class", () => {
+        const fixture = createFixture();
+        const card = fixture.document.createElement("div");
+        card.className = "result_deadbeef other-class";
+
+        assert.equal(fixture.imports.isRootCard(card), true);
+        assert.equal(fixture.imports.getNativeRootCardClass(card), "result_deadbeef");
+
+        const other = fixture.document.createElement("div");
+        other.className = "not-a-result";
+        assert.equal(fixture.imports.isRootCard(other), false);
+        assert.equal(fixture.imports.getNativeRootCardClass(other), "result__2dc39");
     });
 });

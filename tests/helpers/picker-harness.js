@@ -5,7 +5,10 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { Blob } = require("node:buffer");
 
-const SOURCE_PATH = path.resolve(__dirname, "..", "..", "src", "picker-resize.js");
+const SOURCE_PATH = path.resolve(__dirname, "..", "..", "dist", "picker-resize.js");
+if (!fs.existsSync(SOURCE_PATH)) {
+    throw new Error(`Missing ${SOURCE_PATH}. Run "npm run build" before running the tests.`);
+}
 const SOURCE = fs.readFileSync(SOURCE_PATH, "utf8");
 
 let compiledScript = null;
@@ -13,6 +16,97 @@ let compiledScript = null;
 function getCompiledScript() {
     compiledScript ??= new vm.Script(SOURCE, { filename: SOURCE_PATH });
     return compiledScript;
+}
+
+function splitSelectorList(selector) {
+    return String(selector)
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+}
+
+function splitDescendantSelector(selector) {
+    const parts = [];
+    let current = "";
+    let quote = null;
+
+    for (const character of String(selector)) {
+        if (quote) {
+            current += character;
+            if (character === quote) quote = null;
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            quote = character;
+            current += character;
+            continue;
+        }
+        if (/\s/.test(character)) {
+            if (current) {
+                parts.push(current);
+                current = "";
+            }
+            continue;
+        }
+        current += character;
+    }
+
+    if (current) parts.push(current);
+    return parts;
+}
+
+function elementMatchesCompound(element, compound) {
+    const attributePattern = /\[([\w-]+)(?:(\*|\^|\$)?=(?:"([^"]*)"|'([^']*)'|([^\]]+)))?\]/g;
+    let rest = String(compound);
+
+    for (const match of String(compound).matchAll(attributePattern)) {
+        const [, name, operator, doubleQuoted, singleQuoted, bare] = match;
+        const expected = doubleQuoted ?? singleQuoted ?? bare;
+        const actual = element.getAttribute?.(name);
+        if (actual == null) return false;
+        if (!operator) {
+            if (expected !== undefined && String(actual) !== expected) return false;
+            continue;
+        }
+
+        const value = String(actual);
+        if (operator === "*" && !value.includes(expected)) return false;
+        if (operator === "^" && !value.startsWith(expected)) return false;
+        if (operator === "$" && !value.endsWith(expected)) return false;
+    }
+
+    attributePattern.lastIndex = 0;
+    rest = rest.replace(attributePattern, "");
+    for (const token of rest.matchAll(/([.#]?)([A-Za-z_][\w-]*)/g)) {
+        const [, prefix, name] = token;
+        if (prefix === ".") {
+            if (!element.classList.contains(name)) return false;
+        } else if (prefix === "#") {
+            if (element.id !== name) return false;
+        } else if (element.tagName !== name.toUpperCase()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function elementMatchesSelector(element, selector) {
+    return splitSelectorList(selector).some((candidate) => {
+        const parts = splitDescendantSelector(candidate);
+        if (parts.length === 0) return false;
+        if (!elementMatchesCompound(element, parts[parts.length - 1])) return false;
+
+        let ancestor = element.parentElement;
+        for (let index = parts.length - 2; index >= 0; index--) {
+            while (ancestor && !elementMatchesCompound(ancestor, parts[index])) {
+                ancestor = ancestor.parentElement;
+            }
+            if (!ancestor) return false;
+            ancestor = ancestor.parentElement;
+        }
+        return true;
+    });
 }
 
 class FakeClassList {
@@ -157,8 +251,12 @@ class FakeElement {
             const index = this.parentElement.children.indexOf(this);
             if (index >= 0) this.parentElement.children.splice(index, 1);
         }
+        const disconnect = (element) => {
+            element.isConnected = false;
+            for (const child of element.children) disconnect(child);
+        };
+        disconnect(this);
         this.parentElement = null;
-        this.isConnected = false;
     }
 
     addEventListener(type, listener, options = {}) {
@@ -217,6 +315,8 @@ class FakeElement {
     }
 
     getAttribute(name) {
+        if (name === "class") return this.className || null;
+        if (name === "id") return this.id || null;
         return this.attributes[name] ?? null;
     }
 
@@ -233,28 +333,16 @@ class FakeElement {
     }
 
     matches(selector) {
-        return String(selector)
-            .split(",")
-            .some((part) => this.matchesOne(part.trim()));
+        return elementMatchesSelector(this, selector);
     }
 
-    matchesOne(selector) {
-        if (!selector) return false;
-        if (selector.startsWith(".")) return this.classList.contains(selector.slice(1));
-        if (selector.startsWith("#")) return this.id === selector.slice(1);
-
-        const classContains = selector.match(/^\[class\*="([^"]+)"\]$/);
-        if (classContains) {
-            return [...this.classList.classes].some((name) => name.includes(classContains[1]));
+    closest(selector) {
+        let current = this;
+        while (current) {
+            if (current.matches?.(selector)) return current;
+            current = current.parentElement;
         }
-
-        const attribute = selector.match(/^\[([\w-]+)(?:="([^"]*)")?\]$/);
-        if (attribute) {
-            const value = this.getAttribute(attribute[1]);
-            return attribute[2] == null ? value != null : value === attribute[2];
-        }
-
-        return this.tagName === selector.toUpperCase();
+        return null;
     }
 
     querySelectorAll(selector) {
@@ -328,6 +416,14 @@ class FakeDocument {
 
     getElementById(id) {
         return this.elements.find((element) => element.id === id && element.isConnected) ?? null;
+    }
+
+    querySelectorAll(selector) {
+        return this.documentElement.querySelectorAll(selector);
+    }
+
+    querySelector(selector) {
+        return this.documentElement.querySelector(selector);
     }
 
     addEventListener() {}

@@ -66,6 +66,27 @@ describe("resize grip", () => {
         assert.equal(drawer.children.length, 1);
     });
 
+    test("initDrawer recreates a grip removed by a Discord re-render", () => {
+        const fixture = createFixture({ Vencord: { Settings: {} } });
+        const { drawer } = createDrawer(fixture, {
+            width: 700,
+            height: 400,
+            top: 300,
+            right: 1000,
+            bottom: 700,
+            left: 300
+        });
+
+        fixture.resize.initDrawer(drawer);
+        drawer.children[0].remove();
+        assert.equal(drawer.children.length, 0);
+
+        fixture.resize.initDrawer(drawer);
+
+        assert.equal(drawer.children.length, 1);
+        assert.equal(drawer.children[0].className, "vc-picker-resize");
+    });
+
     test("dragging updates both dimensions and persists them", () => {
         const savedHeights = [];
         const widths = [];

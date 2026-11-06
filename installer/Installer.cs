@@ -258,6 +258,7 @@ namespace VencordExpressionPickerEnhanced.Setup
             WriteResource("payload.uninstall.ps1", Path.Combine(root, "uninstall.ps1"));
             WriteResource("payload.picker-resize.js", Path.Combine(sourceDir, "picker-resize.js"));
             WriteResource("payload.watcher.ps1", Path.Combine(sourceDir, "watcher.ps1"));
+            WriteResource("payload.loader.js", Path.Combine(sourceDir, "loader.js"));
             WriteResource("payload.app.ico", Path.Combine(root, "app.ico"));
             return root;
         }
