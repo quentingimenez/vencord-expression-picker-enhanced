@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
   <title id="title">Vencord Expression Picker Enhanced</title>
-  <desc id="desc">A large Discord expression picker with a small resize grip in the top-left corner, an imported GIF category, and favorite and delete buttons on GIF tiles.</desc>
+  <desc id="desc">A large Discord expression picker with a small resize grip in the top-left corner, an upload button in the top-right corner, and favorite stars on GIF tiles.</desc>
 
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
@@ -143,6 +143,12 @@
     <text x="40" y="112" fill="#949ba4" font-size="14">picker's top-left corner.</text>
     <path d="M210 78 C 218 78, 226 80, 233 85" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
     <path d="M225.6 83.3 L 233 85 L 229.0 78.5" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <text x="1160" y="66" fill="#dbdee1" font-size="21" font-weight="600" text-anchor="end">Upload</text>
+    <text x="1160" y="92" fill="#949ba4" font-size="14" text-anchor="end">Import local GIFs,</text>
+    <text x="1160" y="112" fill="#949ba4" font-size="14" text-anchor="end">images and videos.</text>
+    <path d="M1032 146 C 1005 146, 970 130, 956 116" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+    <path d="M958.5 125.7 L 956 116 L 965.1 120.3" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 
   <!-- bottom caption -->
