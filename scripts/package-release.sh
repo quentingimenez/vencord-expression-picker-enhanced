@@ -19,12 +19,13 @@ trap cleanup EXIT HUP INT TERM
 
 node "$root/scripts/build-renderer.js"
 
-mkdir -p "$stage/src" "$stage/assets" "$dist"
+mkdir -p "$stage/src" "$stage/assets" "$stage/docs" "$dist"
 chmod 755 "$stage"
 cp "$root/install.sh" "$root/uninstall.sh" "$stage/"
 cp "$root/src/watcher.sh" "$root/src/unix-common.sh" "$root/src/loader.js" "$stage/src/"
 cp "$root/dist/picker-resize.js" "$stage/"
-cp "$root/README.md" "$root/LICENSE" "$root/THIRD_PARTY_NOTICES.md" "$root/AUDIT.md" "$stage/"
+cp "$root/README.md" "$root/LICENSE" "$root/THIRD_PARTY_NOTICES.md" "$stage/"
+cp "$root/docs/AUDIT.md" "$stage/docs/"
 cp "$root/assets/preview.svg" "$stage/assets/"
 chmod 755 "$stage/install.sh" "$stage/uninstall.sh" "$stage/src/watcher.sh"
 

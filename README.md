@@ -293,7 +293,7 @@ macOS/Linux). `npm run test:coverage` prints the coverage report. Node.js
 22.13+ or 24+ is required. Prettier and ESLint are development-only
 dependencies; the vendored `gifenc` block is excluded from both. The quality
 audit and the rationale behind the current structure are documented in
-[`AUDIT.md`](AUDIT.md).
+[`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Troubleshooting
 

@@ -38,9 +38,10 @@ try {
     if (-not (Test-Path $setup)) { throw "Setup executable was not produced." }
 
     New-Item -ItemType Directory -Force -Path $stage | Out-Null
-    foreach ($file in @("install.cmd", "install.ps1", "uninstall.cmd", "uninstall.ps1", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "AUDIT.md")) {
+    foreach ($file in @("install.cmd", "install.ps1", "uninstall.cmd", "uninstall.ps1", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md")) {
         Copy-ReleaseFile (Join-Path $root $file) (Join-Path $stage $file)
     }
+    Copy-ReleaseFile (Join-Path $root "docs\AUDIT.md") (Join-Path $stage "docs\AUDIT.md")
     Copy-ReleaseFile (Join-Path $dist "picker-resize.js") (Join-Path $stage "picker-resize.js")
     Copy-ReleaseFile (Join-Path $root "src\watcher.ps1") (Join-Path $stage "src\watcher.ps1")
     Copy-ReleaseFile (Join-Path $root "src\loader.js") (Join-Path $stage "src\loader.js")
