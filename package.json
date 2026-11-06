@@ -1,6 +1,6 @@
 {
   "name": "vencord-expression-picker-enhanced",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
   "type": "commonjs",
   "description": "Larger, resizable and persistent expression picker for Vencord on Windows, macOS and Linux",

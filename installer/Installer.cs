@@ -12,8 +12,8 @@ using Microsoft.Win32;
 [assembly: AssemblyDescription("Installer and uninstaller for Vencord Expression Picker Enhanced")]
 [assembly: AssemblyProduct("Vencord Expression Picker Enhanced")]
 [assembly: AssemblyCompany("quentingimenez")]
-[assembly: AssemblyVersion("1.7.0.0")]
-[assembly: AssemblyFileVersion("1.7.0.0")]
+[assembly: AssemblyVersion("1.8.0.0")]
+[assembly: AssemblyFileVersion("1.8.0.0")]
 
 namespace VencordExpressionPickerEnhanced.Setup
 {

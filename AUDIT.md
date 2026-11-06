@@ -16,7 +16,7 @@ L'audit a été suivi d'un refactor sans changement fonctionnel volontaire,
 validé par les 104 tests existants puis par 8 tests ajoutés (112 au total).
 Le durcissement décrit plus bas porte la suite à 119 tests, puis la dernière
 passe d'architecture et d'intégration à 137 tests, et le support macOS/Linux
-à 143 tests.
+à 144 tests.
 
 ## Constats et corrections
 
